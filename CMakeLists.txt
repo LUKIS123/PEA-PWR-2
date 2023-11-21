@@ -13,4 +13,14 @@ add_executable(PEA_PWR_2 main.cpp
         FileUtils/DataFileUtility.cpp
         FileUtils/DataFileUtility.h
         MeasureTime/Timer.cpp
-        MeasureTime/Timer.h)
+        MeasureTime/Timer.h
+        Flow/ActionResult.h
+        Flow/AppController.cpp
+        Flow/AppController.h
+        Flow/ConsoleView.cpp
+        Flow/ConsoleView.h
+        Flow/LatestAlgorithmRan.h
+        Solutions/SimulatedAnnealing.cpp
+        Solutions/SimulatedAnnealing.h
+        Solutions/Utils/GreedyAlgorithm.cpp
+        Solutions/Utils/GreedyAlgorithm.h)
