@@ -23,4 +23,8 @@ add_executable(PEA_PWR_2 main.cpp
         Solutions/SimulatedAnnealing.cpp
         Solutions/SimulatedAnnealing.h
         Solutions/Utils/GreedyAlgorithm.cpp
-        Solutions/Utils/GreedyAlgorithm.h)
+        Solutions/Utils/GreedyAlgorithm.h
+        RandomDataGenerator/RandomDataGenerator.cpp
+        RandomDataGenerator/RandomDataGenerator.h
+        Solutions/Utils/CoolingFunctions.cpp
+        Solutions/Utils/CoolingFunctions.h)

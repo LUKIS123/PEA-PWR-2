@@ -1,14 +1,14 @@
 #include "GreedyAlgorithm.h"
 
 // UWAGA: Dla algorytmu zachlannego wybor wierzcholka startowego ma znaczenie!!!
-std::pair<std::list<int>, int> GreedyAlgorithm::solveGreedyAlgorithm(int **matrix, int matrixSize, int start) {
+std::pair<std::vector<int>, int> GreedyAlgorithm::solveGreedyAlgorithm(int **matrix, int matrixSize, int start) {
     int startVertex = start;
     int distance = 0;
 
     bool *visited = new bool[matrixSize];
     std::fill(visited, visited + matrixSize, false);
 
-    std::list<int> path;
+    std::vector<int> path;
     int currentIndex = startVertex;
 
     do {
