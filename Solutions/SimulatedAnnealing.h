@@ -7,6 +7,7 @@
 #include <vector>
 #include <utility>
 #include <cmath>
+#include <chrono>
 #include "../Matrix/ATSPMatrix.h"
 #include "./Utils/GreedyAlgorithm.h"
 #include "./Utils/CoolingFunctions.h"
@@ -17,16 +18,14 @@ private:
     int **matrix;
     int matrixSize;
     double coolingFactor = 0.99;
-    int timeoutSeconds = 120000;
+    int timeoutSeconds = 120;
     int singleStepLength;
 
 public:
     int greedyAlgorithmCost;
 
-    std::vector<int> bestPath;
-    int bestCost = INT_MAX;
-    std::vector<int> currentPath;
-    int currentCost = INT_MAX;
+    std::vector<int> currentBestPath;
+    int currentBestCost = INT_MAX;
 
     double startingTemperature;
     double currentTemperature;
@@ -42,6 +41,11 @@ public:
 
     static std::vector<int> perturbPath(std::vector<int> path, int size);
 
+    double calculateInitialTemperature(int **matrix, int size);
+
+    std::pair<std::vector<int>, int> generateRandomSolution();
+
+    void displayLatestResults();
 };
 
 

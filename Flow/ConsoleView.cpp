@@ -3,11 +3,12 @@
 ActionResult::mainMenu ConsoleView::mainMenu() {
     system("CLS");
     std::cout << "Menu: Choose from given options..." << std::endl;
-    std::cout << "1 => Load inputMatrix from file" << std::endl;
-    std::cout << "2 => Generate inputMatrix" << std::endl;
-    std::cout << "3 => Display inputMatrix" << std::endl;
-    std::cout << "4 => ALGORITHMS" << std::endl;
-    std::cout << "5 => TESTS" << std::endl;
+    std::cout << "1 => Load input from file" << std::endl;
+    std::cout << "2 => Display matrix" << std::endl;
+    std::cout << "3 => Set timeout" << std::endl;
+    std::cout << "4 => Set alpha factor" << std::endl;
+    std::cout << "5 => RUN: SIMULATED ANNEALING" << std::endl;
+    std::cout << "6 => TESTS" << std::endl;
     std::cout << "0 => Exit" << std::endl;
 
     std::cout << "Choice: ";
@@ -23,9 +24,15 @@ ActionResult::mainMenu ConsoleView::mainMenu() {
     switch (next) {
         case 1:
             return ActionResult::LOAD_DATA;
-        case 3:
+        case 2:
             return ActionResult::DISPLAY_DATA_BUFFER;
+        case 3:
+            return ActionResult::SET_TIMEOUT;
+        case 4:
+            return ActionResult::SET_ALPHA_FACTOR;
         case 5:
+            return ActionResult::RUN_ANNEALING;
+        case 6:
             return ActionResult::RUN_TESTS;
         case 0:
             return ActionResult::END;
@@ -34,6 +41,7 @@ ActionResult::mainMenu ConsoleView::mainMenu() {
     }
 }
 
+// TODO...
 ActionResult::automaticTestsMenu ConsoleView::automaticTestsMenu() {
     system("CLS");
     std::cout << "AUTOMATIC TESTS: Choose from given options..." << std::endl;

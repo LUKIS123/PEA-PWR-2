@@ -1,42 +1,25 @@
 #include <iostream>
 #include <random>
-
-#include "./Matrix/ATSPMatrix.h"
-#include "./Solutions/Utils/GreedyAlgorithm.h"
-#include "./Solutions/SimulatedAnnealing.h"
-#include "./MeasureTime/Timer.h"
+#include "./Flow/AppController.h"
 
 int main() {
-    ATSPMatrix *matrix = new ATSPMatrix();
-    matrix->loadFromFile("../Resources/br17");
-    //matrix->loadFromFile("../Resources/ft53");
 
-    auto result = GreedyAlgorithm::solveGreedyAlgorithm(matrix->getMatrix(), matrix->getSize(), 16);
+//    ATSPMatrix *matrix = new ATSPMatrix();
+//    //matrix->loadFromFile("../Resources/br17");
+//    matrix->loadFromFile("../Resources/ft53");
+//
+//
+//    SimulatedAnnealing *annealing = new SimulatedAnnealing();
+//    annealing->mainFun(matrix, 0.99, 120);
+//    system("PAUSE");
+//    return 0;
 
-    SimulatedAnnealing *annealing = new SimulatedAnnealing();
-
-    long long start = Timer::read_QPC();
-    annealing->mainFun(matrix, 0.98, 120000);
-    long long end = Timer::read_QPC();
-    auto elapsed = Timer::getMicroSecondsElapsed(start, end);
-
-    std::cout << "cost: " << annealing->bestCost << std::endl;
-    std::cout << "path: ";
-    for (const auto &item: annealing->bestPath) {
-        std::cout << item << ", ";
-    }
-    std::cout << std::endl;
-
-    std::cout << "Timer: " << elapsed << " us" << std::endl;
-    std::cout << "     : " << elapsed / 1000 << " ms" << std::endl;
-    std::cout << "     : " << elapsed / 1000000 << " s" << std::endl;
-
-    std::cout << "greedy : " << annealing->greedyAlgorithmCost << std::endl;
-
-    system("PAUSE");
+    srand(time(NULL));
+    auto *controller = new AppController();
+    controller->mainIndex();
+    delete controller;
     return 0;
 }
-
 
 /*
  * cost: 39
