@@ -27,4 +27,6 @@ add_executable(PEA_PWR_2 main.cpp
         RandomDataGenerator/RandomDataGenerator.cpp
         RandomDataGenerator/RandomDataGenerator.h
         Solutions/Utils/CoolingFunctions.cpp
-        Solutions/Utils/CoolingFunctions.h)
+        Solutions/Utils/CoolingFunctions.h
+        Solutions/TabuSearch.h
+        Solutions/TabuSearch.cpp)

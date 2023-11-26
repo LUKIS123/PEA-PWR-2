@@ -3,6 +3,7 @@
 AppController::AppController() {
     matrix = new ATSPMatrix();
     annealing = new SimulatedAnnealing();
+    tabuSearch = new TabuSearch();
 }
 
 AppController::~AppController() {
@@ -44,10 +45,15 @@ void AppController::mainIndex() {
                 status = ActionResult::BACK_TO_MENU;
                 break;
             case ActionResult::RUN_TABU_SEARCH:
+                runTabuSearch();
                 status = ActionResult::BACK_TO_MENU;
                 break;
             case ActionResult::RUN_TESTS:
                 testsMenu();
+                status = ActionResult::BACK_TO_MENU;
+                break;
+            case ActionResult::DISPLAY_LATEST_RESULT:
+                displayLatestResults();
                 status = ActionResult::BACK_TO_MENU;
                 break;
             case ActionResult::END:
@@ -74,6 +80,11 @@ void AppController::setTimeout() {
         std::cout << "Bad entry... Enter a NUMBER: ";
         std::cin >> timeoutSeconds;
     }
+    if (timeoutSeconds <= 0) {
+        std::cout << "Wrong input!";
+        timeoutSeconds = 120;
+        system("PAUSE");
+    }
 }
 
 void AppController::setAlphaFactor() {
@@ -84,6 +95,11 @@ void AppController::setAlphaFactor() {
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         std::cout << "Bad entry... Enter a DECIMAL: ";
         std::cin >> alphaFactor;
+    }
+    if (alphaFactor >= 1.0 || alphaFactor <= 0.0) {
+        std::cout << "Wrong input!";
+        alphaFactor = 0.99;
+        system("PAUSE");
     }
 }
 
@@ -107,7 +123,39 @@ void AppController::runSimulatedAnnealing() {
 }
 
 void AppController::runTabuSearch() {
+    if (!matrix->exists) {
+        std::cout << "MATRIX IS EMPTY" << std::endl;
+        system("PAUSE");
+        return;
+    }
+    latestTimerResult = LatestAlgorithm::TABU;
+    system("PAUSE");
 }
 
 void AppController::testsMenu() {
+}
+
+void AppController::displayLatestResults() {
+    std::cout << "algorithm: ";
+    switch (latestRun) {
+        case SA:
+            std::cout << algorithmTypes[0] << std::endl;
+            break;
+        case TABU:
+            std::cout << algorithmTypes[1] << std::endl;
+            break;
+        default:
+            break;
+    }
+
+    if (latestRun == LatestAlgorithm::SA) {
+        annealing->displayLatestResults();
+    }
+    if (latestRun == LatestAlgorithm::TABU) {
+        tabuSearch->displayLatestResults();
+    }
+    std::cout << "Timer: " << latestTimerResult << " us" << std::endl;
+    std::cout << "     : " << latestTimerResult / 1000 << " ms" << std::endl;
+    std::cout << "     : " << latestTimerResult / 1000000 << " s" << std::endl;
+    system("PAUSE");
 }

@@ -10,11 +10,14 @@
 #include "../Matrix/ATSPMatrix.h"
 #include "../MeasureTime/Timer.h"
 #include "../Solutions/SimulatedAnnealing.h"
+#include "../Solutions/TabuSearch.h"
 
 class AppController {
 private:
     ATSPMatrix *matrix = nullptr;
     SimulatedAnnealing *annealing = nullptr;
+    TabuSearch *tabuSearch = nullptr;
+
     std::string algorithmTypes[2] = {
             "SIMULATED ANNEALING",
             "TABU SEARCH"
@@ -45,6 +48,8 @@ public:
     void runTabuSearch();
 
     void testsMenu();
+
+    void displayLatestResults();
 };
 
 

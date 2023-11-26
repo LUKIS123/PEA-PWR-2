@@ -24,8 +24,11 @@ private:
 public:
     int greedyAlgorithmCost;
 
-    std::vector<int> currentBestPath;
-    int currentBestCost = INT_MAX;
+    std::vector<int> currentPath;
+    int currentCost = INT_MAX;
+
+    std::vector<int> bestPath;
+    int bestCost = INT_MAX;
 
     double startingTemperature;
     double currentTemperature;

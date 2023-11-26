@@ -12,7 +12,8 @@ public:
         RUN_ANNEALING = 5,
         RUN_TABU_SEARCH = 6,
         RUN_TESTS = 7,
-        BACK_TO_MENU = 8
+        BACK_TO_MENU = 8,
+        DISPLAY_LATEST_RESULT
     };
 
     enum automaticTestsMenu {
