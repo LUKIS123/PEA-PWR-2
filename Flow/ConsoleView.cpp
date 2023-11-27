@@ -9,7 +9,8 @@ ActionResult::mainMenu ConsoleView::mainMenu() {
     std::cout << "4 => Set alpha factor" << std::endl;
     std::cout << "5 => Display latest result" << std::endl;
     std::cout << "6 => RUN: SIMULATED ANNEALING" << std::endl;
-    std::cout << "7 => TESTS" << std::endl;
+    std::cout << "7 => RUN: TABU SEARCH" << std::endl;
+    std::cout << "8 => TESTS" << std::endl;
     std::cout << "0 => Exit" << std::endl;
 
     std::cout << "Choice: ";
@@ -36,6 +37,8 @@ ActionResult::mainMenu ConsoleView::mainMenu() {
         case 6:
             return ActionResult::RUN_ANNEALING;
         case 7:
+            return ActionResult::RUN_TABU_SEARCH;
+        case 8:
             return ActionResult::RUN_TESTS;
         case 0:
             return ActionResult::END;

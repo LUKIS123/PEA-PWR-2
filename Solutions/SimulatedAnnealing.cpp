@@ -22,7 +22,7 @@ void SimulatedAnnealing::mainFun(ATSPMatrix *ATSPMatrix, double alpha, int timeo
 
     // todo: to najlepsze
     //singleStepLength = int(greedyAlgorithmCost * 1.25);
-    singleStepLength = matrixSize * matrixSize * 2;
+    singleStepLength = matrixSize * matrixSize;
 
 //    currentTemperature = startingTemperature;
     breakTemperature = std::pow(10.0, -9);
@@ -61,6 +61,7 @@ void SimulatedAnnealing::solveTSP() {
                 }
             }
         }
+        // Schladzanie temperatury po petli for
         currentTemperature = CoolingFunctions::updateWithLinearCooling(currentTemperature, coolingFactor);
 
         // Przerwanie petli po przekroczeniu kryterium stopu
@@ -109,21 +110,21 @@ std::vector<int> SimulatedAnnealing::perturbPath(std::vector<int> path, int size
 
 double SimulatedAnnealing::calculateInitialTemperature(int **matrix, int size) {
     int movesCount = 100;
-    int steps = 100;
+    int steps = matrixSize * 100;
     int totalCostChange = 0;
 
     for (int i = 0; i < movesCount; i++) {
         auto currentSolution = generateRandomSolution();
-        int currentCost = currentSolution.second;
+        int currentSolCost = currentSolution.second;
         for (int j = 0; j < steps; j++) {
             auto newSolution = perturbPath(currentSolution.first, size);
             int newCost = calculateCost(matrix, newSolution);
-            totalCostChange += abs(newCost - currentCost);
+            totalCostChange += abs(newCost - currentSolCost);
         }
     }
 
     double averageCostChange = totalCostChange / (movesCount * steps);
-    return -averageCostChange / log(0.99);
+    return -averageCostChange / log(0.85);
 }
 
 std::pair<std::vector<int>, int> SimulatedAnnealing::generateRandomSolution() {

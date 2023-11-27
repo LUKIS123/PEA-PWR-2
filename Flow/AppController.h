@@ -25,7 +25,15 @@ private:
 
     LatestAlgorithm latestRun = LatestAlgorithm::NONE;
     double latestTimerResult = 0.0;
+
+    // SA
     double alphaFactor = 0.99;
+
+    // TABU SEARCH
+    int tabuMaxIterations = 1000000;
+    int tabuIterationsCount = 100;
+
+    // SHARED
     int timeoutSeconds = 120;
 
 public:

@@ -128,7 +128,16 @@ void AppController::runTabuSearch() {
         system("PAUSE");
         return;
     }
+    long long start = Timer::read_QPC();
+    tabuSearch->mainFun(matrix, tabuIterationsCount, tabuMaxIterations, timeoutSeconds);
+    long long end = Timer::read_QPC();
+    tabuSearch->displayLatestResults();
+    latestTimerResult = Timer::getMicroSecondsElapsed(start, end);
     latestTimerResult = LatestAlgorithm::TABU;
+
+    std::cout << "Timer: " << latestTimerResult << " us" << std::endl;
+    std::cout << "     : " << latestTimerResult / 1000 << " ms" << std::endl;
+    std::cout << "     : " << latestTimerResult / 1000000 << " s" << std::endl;
     system("PAUSE");
 }
 
