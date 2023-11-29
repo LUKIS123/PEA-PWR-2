@@ -10,7 +10,6 @@
 #include <chrono>
 #include "../Matrix/ATSPMatrix.h"
 #include "./Utils/GreedyAlgorithm.h"
-#include "./Utils/PathUtils.h"
 #include "../RandomDataGenerator/RandomDataGenerator.h"
 
 
@@ -21,7 +20,7 @@ private:
     int timeoutSeconds = 120;
 
     int maxIterations;
-    int tabuIterations;
+    int tabuIterationsCadence;
     int **tabuMoves;
 
 public:
@@ -33,7 +32,9 @@ public:
     std::vector<int> bestPath;
     int bestCost = INT_MAX;
 
-    void mainFun(ATSPMatrix *ATSPMatrix, int tabuIterationsCount, int iterations, int timeout);
+    std::list<int> *latestCostsList;
+
+    void mainFun(ATSPMatrix *ATSPMatrix, int tabuCadenceIterationsCount, int iterations, int timeout);
 
     void solveTSP();
 
@@ -43,7 +44,12 @@ public:
 
     int getSwappedPathCost(int v1, int v2, std::vector<int> path);
 
+    std::list<std::pair<std::pair<int, int>, int>>
+    filterTabuSwaps(const std::list<std::pair<std::pair<int, int>, int>> &swaps);
 
+    void updateTabuList(int v1, int v2);
+
+    std::pair<std::vector<int>, int> generateDiversificationCandidate();
 
 };
 

@@ -1,5 +1,18 @@
 #include "SimulatedAnnealing.h"
 
+void SimulatedAnnealing::displayLatestResults() {
+    std::cout << "Greedy algo cost: " << greedyAlgorithmCost << std::endl;
+    std::cout << "SIMULATED ANNEALING RESULTS:" << std::endl;
+    std::cout << "Path: ";
+    for (const auto &item: bestPath) {
+        std::cout << item << ", ";
+    }
+    std::cout << std::endl;
+    std::cout << "SIMULATED ANNEALING Cost: " << bestCost << std::endl;
+    std::cout << "END TEMPERATURE [Tk] : " << currentTemperature << std::endl;
+    std::cout << "exp(-1/Tk): " << exp(-1 / currentTemperature) << std::endl;
+}
+
 void SimulatedAnnealing::mainFun(ATSPMatrix *ATSPMatrix, double alpha, int timeout) {
     this->matrix = ATSPMatrix->getMatrix();
     this->matrixSize = ATSPMatrix->getSize();
@@ -14,26 +27,11 @@ void SimulatedAnnealing::mainFun(ATSPMatrix *ATSPMatrix, double alpha, int timeo
     bestPath = currentPath;
     bestCost = greedyAlgorithmCost;
 
-    //startingTemperature = greedyAlgorithmCost * alpha;
-    // todo: to najlepsze
-    // startingTemperature = greedyAlgorithmCost * matrixSize;
-    //singleStepLength = int(greedyAlgorithmCost * alpha);
-    //singleStepLength = matrixSize * matrixSize*2;
-
-    // todo: to najlepsze
-    //singleStepLength = int(greedyAlgorithmCost * 1.25);
-    singleStepLength = matrixSize * matrixSize;
-
-//    currentTemperature = startingTemperature;
-    breakTemperature = std::pow(10.0, -9);
-
     startingTemperature = calculateInitialTemperature(matrix, matrixSize);
     currentTemperature = startingTemperature;
-//    singleStepLength = matrixSize * matrixSize * 2;
+    singleStepLength = matrixSize * matrixSize;
 
-//    std::cout << "temp1 ; " << startingTemperature;
-//    std::cout << "\ntemp2 ; " << greedyAlgorithmCost * matrixSize;
-//    return;
+    breakTemperature = std::pow(10.0, -9);
 
     solveTSP();
 }
@@ -110,6 +108,9 @@ std::vector<int> SimulatedAnnealing::perturbPath(std::vector<int> path, int size
 
 double SimulatedAnnealing::calculateInitialTemperature(int **matrix, int size) {
     int movesCount = 100;
+    if (matrixSize > 100) {
+        movesCount = matrixSize;
+    }
     int steps = matrixSize * 100;
     int totalCostChange = 0;
 
@@ -141,16 +142,4 @@ std::pair<std::vector<int>, int> SimulatedAnnealing::generateRandomSolution() {
     path.push_back(path[0]);
     int cost = calculateCost(matrix, path);
     return std::make_pair(path, cost);
-}
-
-void SimulatedAnnealing::displayLatestResults() {
-    std::cout << "Greedy algo cost: " << greedyAlgorithmCost << std::endl;
-    std::cout << "SIMULATED ANNEALING RESULTS:" << std::endl;
-    std::cout << "Path: ";
-    for (const auto &item: bestPath) {
-        std::cout << item << ", ";
-    }
-    std::cout << std::endl;
-    std::cout << "SIMULATED ANNEALING Cost: " << bestCost << std::endl;
-    std::cout << "END TEMPERATURE: " << currentTemperature << std::endl;
 }

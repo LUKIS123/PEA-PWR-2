@@ -44,6 +44,10 @@ void AppController::mainIndex() {
                 runSimulatedAnnealing();
                 status = ActionResult::BACK_TO_MENU;
                 break;
+            case ActionResult::SET_TS_PARAMS:
+                setTSParams();
+                status = ActionResult::BACK_TO_MENU;
+                break;
             case ActionResult::RUN_TABU_SEARCH:
                 runTabuSearch();
                 status = ActionResult::BACK_TO_MENU;
@@ -122,6 +126,37 @@ void AppController::runSimulatedAnnealing() {
     system("PAUSE");
 }
 
+void AppController::setTSParams() {
+    std::cout << "Set TS max iterations: ";
+    std::cin >> tabuMaxIterations;
+    while (std::cin.fail()) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Bad entry... Enter a NUMBER: ";
+        std::cin >> tabuMaxIterations;
+    }
+    if (tabuMaxIterations <= 0) {
+        std::cout << "Wrong input!";
+        tabuMaxIterations = 1000000;
+        system("PAUSE");
+        return;
+    }
+    std::cout << "Set TS cadence: ";
+    std::cin >> cadence;
+    while (std::cin.fail()) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Bad entry... Enter a NUMBER: ";
+        std::cin >> cadence;
+    }
+    if (cadence <= 0) {
+        std::cout << "Wrong input!";
+        cadence = 100;
+        system("PAUSE");
+        return;
+    }
+}
+
 void AppController::runTabuSearch() {
     if (!matrix->exists) {
         std::cout << "MATRIX IS EMPTY" << std::endl;
@@ -129,11 +164,11 @@ void AppController::runTabuSearch() {
         return;
     }
     long long start = Timer::read_QPC();
-    tabuSearch->mainFun(matrix, tabuIterationsCount, tabuMaxIterations, timeoutSeconds);
+    tabuSearch->mainFun(matrix, cadence, tabuMaxIterations, timeoutSeconds);
     long long end = Timer::read_QPC();
     tabuSearch->displayLatestResults();
     latestTimerResult = Timer::getMicroSecondsElapsed(start, end);
-    latestTimerResult = LatestAlgorithm::TABU;
+    latestRun = LatestAlgorithm::TABU;
 
     std::cout << "Timer: " << latestTimerResult << " us" << std::endl;
     std::cout << "     : " << latestTimerResult / 1000 << " ms" << std::endl;
@@ -142,6 +177,7 @@ void AppController::runTabuSearch() {
 }
 
 void AppController::testsMenu() {
+
 }
 
 void AppController::displayLatestResults() {

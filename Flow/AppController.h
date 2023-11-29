@@ -31,7 +31,7 @@ private:
 
     // TABU SEARCH
     int tabuMaxIterations = 1000000;
-    int tabuIterationsCount = 100;
+    int cadence = 100;
 
     // SHARED
     int timeoutSeconds = 120;
@@ -58,6 +58,8 @@ public:
     void testsMenu();
 
     void displayLatestResults();
+
+    void setTSParams();
 };
 
 

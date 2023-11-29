@@ -5,12 +5,13 @@ ActionResult::mainMenu ConsoleView::mainMenu() {
     std::cout << "Menu: Choose from given options..." << std::endl;
     std::cout << "1 => Load input from file" << std::endl;
     std::cout << "2 => Display matrix" << std::endl;
-    std::cout << "3 => Set timeout" << std::endl;
-    std::cout << "4 => Set alpha factor" << std::endl;
-    std::cout << "5 => Display latest result" << std::endl;
-    std::cout << "6 => RUN: SIMULATED ANNEALING" << std::endl;
-    std::cout << "7 => RUN: TABU SEARCH" << std::endl;
-    std::cout << "8 => TESTS" << std::endl;
+    std::cout << "3 => Display latest result" << std::endl;
+    std::cout << "4 => Set timeout" << std::endl;
+    std::cout << "5 => Set alpha factor" << std::endl;
+    std::cout << "6 => RUN:     SIMULATED ANNEALING" << std::endl;
+    std::cout << "7 => Set TS parameters" << std::endl;
+    std::cout << "8 => RUN:     TABU SEARCH" << std::endl;
+    std::cout << "9 => TESTS" << std::endl;
     std::cout << "0 => Exit" << std::endl;
 
     std::cout << "Choice: ";
@@ -29,16 +30,18 @@ ActionResult::mainMenu ConsoleView::mainMenu() {
         case 2:
             return ActionResult::DISPLAY_DATA_BUFFER;
         case 3:
-            return ActionResult::SET_TIMEOUT;
-        case 4:
-            return ActionResult::SET_ALPHA_FACTOR;
-        case 5:
             return ActionResult::DISPLAY_LATEST_RESULT;
+        case 4:
+            return ActionResult::SET_TIMEOUT;
+        case 5:
+            return ActionResult::SET_ALPHA_FACTOR;
         case 6:
             return ActionResult::RUN_ANNEALING;
         case 7:
-            return ActionResult::RUN_TABU_SEARCH;
+            return ActionResult::SET_TS_PARAMS;
         case 8:
+            return ActionResult::RUN_TABU_SEARCH;
+        case 9:
             return ActionResult::RUN_TESTS;
         case 0:
             return ActionResult::END;

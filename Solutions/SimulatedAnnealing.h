@@ -34,6 +34,8 @@ public:
     double currentTemperature;
     double breakTemperature;
 
+    void displayLatestResults();
+
     static bool acceptanceFunction(int currentVertexWeight, int nextVertexWeight, double temperature);
 
     void mainFun(ATSPMatrix *ATSPMatrix, double alpha, int timeout);
@@ -48,7 +50,6 @@ public:
 
     std::pair<std::vector<int>, int> generateRandomSolution();
 
-    void displayLatestResults();
 };
 
 
