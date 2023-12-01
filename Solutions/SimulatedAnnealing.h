@@ -12,6 +12,7 @@
 #include "./Utils/GreedyAlgorithm.h"
 #include "./Utils/CoolingFunctions.h"
 #include "../RandomDataGenerator/RandomDataGenerator.h"
+#include "../MeasureTime/Timer.h"
 
 class SimulatedAnnealing {
 private:
@@ -29,6 +30,7 @@ public:
 
     std::vector<int> bestPath;
     int bestCost = INT_MAX;
+    long long int bestCostFoundQPC;
 
     double startingTemperature;
     double currentTemperature;
@@ -50,6 +52,8 @@ public:
 
     std::pair<std::vector<int>, int> generateRandomSolution();
 
+private:
+    void clearMemory();
 };
 
 

@@ -10,17 +10,18 @@ public:
         SET_TIMEOUT = 3,
         SET_ALPHA_FACTOR = 4,
         RUN_ANNEALING = 5,
-        SET_TS_PARAMS = 6,
-        RUN_TABU_SEARCH = 7,
-        RUN_TESTS = 8,
-        BACK_TO_MENU = 9,
-        DISPLAY_LATEST_RESULT
+        RUN_TABU_SEARCH = 6,
+        RUN_TESTS = 7,
+        BACK_TO_MENU = 8,
+        DISPLAY_LATEST_RESULT = 9,
+        READ_AND_CALCULATE_SAVED_PATH = 10,
     };
 
     enum automaticTestsMenu {
         END_TEST = 0,
         MENU_TEST = 1,
-        SET_TEST_COUNT = 2,
+        TEST_SA = 2,
+        TEST_TS = 3,
     };
 };
 

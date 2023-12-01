@@ -13,6 +13,7 @@ AppController::~AppController() {
 void AppController::clearMemory() {
     delete matrix;
     delete annealing;
+    delete tabuSearch;
 }
 
 void AppController::mainIndex() {
@@ -44,10 +45,6 @@ void AppController::mainIndex() {
                 runSimulatedAnnealing();
                 status = ActionResult::BACK_TO_MENU;
                 break;
-            case ActionResult::SET_TS_PARAMS:
-                setTSParams();
-                status = ActionResult::BACK_TO_MENU;
-                break;
             case ActionResult::RUN_TABU_SEARCH:
                 runTabuSearch();
                 status = ActionResult::BACK_TO_MENU;
@@ -58,6 +55,10 @@ void AppController::mainIndex() {
                 break;
             case ActionResult::DISPLAY_LATEST_RESULT:
                 displayLatestResults();
+                status = ActionResult::BACK_TO_MENU;
+                break;
+            case ActionResult::READ_AND_CALCULATE_SAVED_PATH:
+                readPathAndDisplayCalculatedCost();
                 status = ActionResult::BACK_TO_MENU;
                 break;
             case ActionResult::END:
@@ -123,38 +124,8 @@ void AppController::runSimulatedAnnealing() {
     std::cout << "Timer: " << latestTimerResult << " us" << std::endl;
     std::cout << "     : " << latestTimerResult / 1000 << " ms" << std::endl;
     std::cout << "     : " << latestTimerResult / 1000000 << " s" << std::endl;
+    DataFileUtility::saveResultPath(resultPathFileName, annealing->bestPath);
     system("PAUSE");
-}
-
-void AppController::setTSParams() {
-    std::cout << "Set TS max iterations: ";
-    std::cin >> tabuMaxIterations;
-    while (std::cin.fail()) {
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::cout << "Bad entry... Enter a NUMBER: ";
-        std::cin >> tabuMaxIterations;
-    }
-    if (tabuMaxIterations <= 0) {
-        std::cout << "Wrong input!";
-        tabuMaxIterations = 1000000;
-        system("PAUSE");
-        return;
-    }
-    std::cout << "Set TS cadence: ";
-    std::cin >> cadence;
-    while (std::cin.fail()) {
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::cout << "Bad entry... Enter a NUMBER: ";
-        std::cin >> cadence;
-    }
-    if (cadence <= 0) {
-        std::cout << "Wrong input!";
-        cadence = 100;
-        system("PAUSE");
-        return;
-    }
 }
 
 void AppController::runTabuSearch() {
@@ -164,7 +135,7 @@ void AppController::runTabuSearch() {
         return;
     }
     long long start = Timer::read_QPC();
-    tabuSearch->mainFun(matrix, cadence, tabuMaxIterations, timeoutSeconds);
+    tabuSearch->mainFun(matrix, timeoutSeconds);
     long long end = Timer::read_QPC();
     tabuSearch->displayLatestResults();
     latestTimerResult = Timer::getMicroSecondsElapsed(start, end);
@@ -173,11 +144,8 @@ void AppController::runTabuSearch() {
     std::cout << "Timer: " << latestTimerResult << " us" << std::endl;
     std::cout << "     : " << latestTimerResult / 1000 << " ms" << std::endl;
     std::cout << "     : " << latestTimerResult / 1000000 << " s" << std::endl;
+    DataFileUtility::saveResultPath(resultPathFileName, tabuSearch->bestPath);
     system("PAUSE");
-}
-
-void AppController::testsMenu() {
-
 }
 
 void AppController::displayLatestResults() {
@@ -190,7 +158,7 @@ void AppController::displayLatestResults() {
             std::cout << algorithmTypes[1] << std::endl;
             break;
         default:
-            break;
+            return;
     }
 
     if (latestRun == LatestAlgorithm::SA) {
@@ -202,5 +170,116 @@ void AppController::displayLatestResults() {
     std::cout << "Timer: " << latestTimerResult << " us" << std::endl;
     std::cout << "     : " << latestTimerResult / 1000 << " ms" << std::endl;
     std::cout << "     : " << latestTimerResult / 1000000 << " s" << std::endl;
+    system("PAUSE");
+}
+
+void AppController::readPathAndDisplayCalculatedCost() {
+    auto pathVector = DataFileUtility::readPathFromFile(resultPathFileName);
+    matrix->calculatePathCost(pathVector);
+    system("PAUSE");
+}
+
+void AppController::testsMenu() {
+    system("CLS");
+    std::cout << "AUTOMATIC TESTS Initialization..." << std::endl;
+    std::cout << std::endl << "Set number of tests..." << std::endl;
+    std::cout << "Tests: ";
+    std::cin >> testNumber;
+    while (std::cin.fail()) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Bad entry... Enter a NUMBER: ";
+        std::cin >> testNumber;
+    }
+
+    ActionResult::automaticTestsMenu status = ActionResult::MENU_TEST;
+    while (status != ActionResult::END_TEST) {
+        switch (status) {
+            case ActionResult::MENU_TEST:
+                status = ConsoleView::automaticTestsMenu();
+                break;
+            case ActionResult::TEST_SA:
+                testSimulatedAnnealing();
+                status = ActionResult::MENU_TEST;
+                break;
+            case ActionResult::TEST_TS:
+                testTabuSearch();
+                status = ActionResult::MENU_TEST;
+                break;
+            case ActionResult::END_TEST:
+                break;
+        }
+    }
+}
+
+void AppController::testSimulatedAnnealing() {
+    std::string fileName = "simulated_annealing_tests.csv";
+    std::string bestResultPathFileName = "simulated_annealing_tests_bestpath";
+
+    std::string cols = "us,ms,s";
+    std::vector<double> resultsUS;
+    std::vector<double> resultsMS;
+    std::vector<double> resultsS;
+
+    int bestCost = INT_MAX;
+    std::vector<int> bestPath;
+
+    long long int start, end;
+    double results;
+    for (int i = 0; i < testNumber; i++) {
+        start = Timer::read_QPC();
+        annealing->mainFun(matrix, alphaFactor, timeoutSeconds);
+        end = Timer::read_QPC();
+
+        results = Timer::getMicroSecondsElapsed(start, end);
+        resultsUS.push_back(results);
+        resultsMS.push_back(results / 1000);
+        resultsS.push_back(results / 1000000);
+
+        if (annealing->bestCost <= bestCost) {
+            bestCost = annealing->bestCost;
+            bestPath = annealing->bestPath;
+        }
+    }
+
+    DataFileUtility::saveAutomaticTestResults(fileName, resultsUS, resultsMS, resultsS, cols);
+    DataFileUtility::saveResultPath(bestResultPathFileName, bestPath);
+    std::cout << "Done!" << std::endl;
+    system("PAUSE");
+}
+
+void AppController::testTabuSearch() {
+    std::string fileName = "tabu_search_tests.csv";
+    std::string bestResultPathFileName = "tabu_search_tests_bestpath";
+
+    std::string cols = "us,ms,s";
+    std::vector<double> resultsUS;
+    std::vector<double> resultsMS;
+    std::vector<double> resultsS;
+
+    int bestCost = INT_MAX;
+    std::vector<int> bestPath;
+
+    long long int start, end;
+    double results;
+    for (int i = 0; i < testNumber; i++) {
+        start = Timer::read_QPC();
+        tabuSearch->mainFun(matrix, timeoutSeconds);
+        end = Timer::read_QPC();
+
+        results = Timer::getMicroSecondsElapsed(start, end);
+        resultsUS.push_back(results);
+        resultsMS.push_back(results / 1000);
+        resultsS.push_back(results / 1000000);
+
+        if (tabuSearch->bestCost <= bestCost) {
+            bestCost = tabuSearch->bestCost;
+            bestPath = tabuSearch->bestPath;
+        }
+    }
+
+    DataFileUtility::saveAutomaticTestResults(fileName, resultsUS, resultsMS, resultsS, cols);
+    DataFileUtility::saveResultPath(bestResultPathFileName, bestPath);
+    std::cout << "Done!" << std::endl;
     system("PAUSE");
 }

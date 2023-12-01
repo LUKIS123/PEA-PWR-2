@@ -3,6 +3,7 @@
 ATSPMatrix::ATSPMatrix() = default;
 
 ATSPMatrix::~ATSPMatrix() {
+    clearData();
 }
 
 int **ATSPMatrix::getMatrix() {
@@ -81,4 +82,26 @@ void ATSPMatrix::displayMatrix() {
         }
         std::cout << std::endl;
     }
+}
+
+void ATSPMatrix::calculatePathCost(const std::vector<int> &path) {
+    if (matrix == nullptr) {
+        std::cout << "Matrix is empty" << std::endl;
+        return;
+    }
+
+    int pathCost = 0;
+    auto currentV = path.begin();
+    auto nextV = ++path.begin();
+    for (; nextV != path.end(); currentV++) {
+        pathCost += matrix[*currentV][*nextV];
+        nextV++;
+    }
+
+    std::cout << "Path:" << std::endl;
+    for (const auto &item: path) {
+        std::cout << item << ", ";
+    }
+    std::cout << std::endl;
+    std::cout << "CALCULATED COST: " << pathCost << std::endl;
 }
