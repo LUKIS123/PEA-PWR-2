@@ -27,6 +27,7 @@ private:
     int testNumber = 10;
 
     LatestAlgorithm latestRun = LatestAlgorithm::NONE;
+    long long int latestTimerStart;
     double latestTimerResult = 0.0;
 
     // SA PARAMS

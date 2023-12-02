@@ -34,7 +34,6 @@ public:
 
     double startingTemperature;
     double currentTemperature;
-    double breakTemperature;
 
     void displayLatestResults();
 

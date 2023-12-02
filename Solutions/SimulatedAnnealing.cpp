@@ -40,8 +40,6 @@ void SimulatedAnnealing::mainFun(ATSPMatrix *ATSPMatrix, double alpha, int timeo
     currentTemperature = startingTemperature;
     singleStepLength = matrixSize * 10;
 
-    breakTemperature = std::pow(10.0, -9);
-
     solveTSP();
 }
 
@@ -50,7 +48,7 @@ void SimulatedAnnealing::solveTSP() {
                                                  std::chrono::duration_cast<std::chrono::seconds>(
                                                          std::chrono::duration<int>(timeoutSeconds)
                                                  );
-    while (currentTemperature > breakTemperature) {
+    while ((breakAlgoTimePoint - std::chrono::system_clock::now()).count() > 0) {
         for (int step = 0; step < singleStepLength; step++) {
             auto changedPath = perturbPath(currentPath, matrixSize);
             int changedPathCost = calculateCost(matrix, changedPath);
@@ -71,12 +69,6 @@ void SimulatedAnnealing::solveTSP() {
         }
         // Schladzanie temperatury po petli for
         currentTemperature = CoolingFunctions::updateWithLinearCooling(currentTemperature, coolingFactor);
-
-        // Przerwanie petli po przekroczeniu kryterium stopu
-        if ((breakAlgoTimePoint - std::chrono::system_clock::now()).count() < 0) {
-            break;
-        }
-
     }
 }
 

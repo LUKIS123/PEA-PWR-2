@@ -119,11 +119,14 @@ void AppController::runSimulatedAnnealing() {
     long long end = Timer::read_QPC();
     annealing->displayLatestResults();
     latestTimerResult = Timer::getMicroSecondsElapsed(start, end);
+    latestTimerStart = start;
     latestRun = LatestAlgorithm::SA;
 
-    std::cout << "Timer: " << latestTimerResult << " us" << std::endl;
-    std::cout << "     : " << latestTimerResult / 1000 << " ms" << std::endl;
+    std::cout << "Timer: " << latestTimerResult / 1000 << " ms" << std::endl;
     std::cout << "     : " << latestTimerResult / 1000000 << " s" << std::endl;
+    std::cout << "Best result found after: " <<
+              Timer::getSecondsElapsed(start, annealing->bestCostFoundQPC) << " s" << std::endl;
+
     DataFileUtility::saveResultPath(resultPathFileName, annealing->bestPath);
     system("PAUSE");
 }
@@ -139,11 +142,14 @@ void AppController::runTabuSearch() {
     long long end = Timer::read_QPC();
     tabuSearch->displayLatestResults();
     latestTimerResult = Timer::getMicroSecondsElapsed(start, end);
+    latestTimerStart = start;
     latestRun = LatestAlgorithm::TABU;
 
-    std::cout << "Timer: " << latestTimerResult << " us" << std::endl;
-    std::cout << "     : " << latestTimerResult / 1000 << " ms" << std::endl;
+    std::cout << "Timer: " << latestTimerResult / 1000 << " ms" << std::endl;
     std::cout << "     : " << latestTimerResult / 1000000 << " s" << std::endl;
+    std::cout << "Best result found after: " <<
+              Timer::getSecondsElapsed(start, tabuSearch->bestCostFoundQPC) << " s" << std::endl;
+
     DataFileUtility::saveResultPath(resultPathFileName, tabuSearch->bestPath);
     system("PAUSE");
 }
@@ -163,9 +169,13 @@ void AppController::displayLatestResults() {
 
     if (latestRun == LatestAlgorithm::SA) {
         annealing->displayLatestResults();
+        std::cout << "Best result found after: " <<
+                  Timer::getSecondsElapsed(latestTimerStart, tabuSearch->bestCostFoundQPC) << " s" << std::endl;
     }
     if (latestRun == LatestAlgorithm::TABU) {
         tabuSearch->displayLatestResults();
+        std::cout << "Best result found after: " <<
+                  Timer::getSecondsElapsed(latestTimerStart, tabuSearch->bestCostFoundQPC) << " s" << std::endl;
     }
     std::cout << "Timer: " << latestTimerResult << " us" << std::endl;
     std::cout << "     : " << latestTimerResult / 1000 << " ms" << std::endl;

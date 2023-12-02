@@ -146,6 +146,7 @@ void TabuSearch::solveTSP() {
 
 std::vector<std::pair<std::pair<int, int>, int>>
 TabuSearch::getNextMovesFromNeighbours(const std::vector<int> &solution) {
+    // todo moze zamienic na set!!!
     auto neighbourList = std::vector<std::pair<std::pair<int, int>, int>>();
     neighbourList.reserve((matrixSize * matrixSize) / 2);
     for (int i = 0; i < matrixSize - 1; i++) {
@@ -203,6 +204,7 @@ std::pair<std::vector<int>, int> TabuSearch::generateDiversificationCandidate() 
     std::vector<int> candidatePath;
 
     if (diversificationEventCounter % 2 == 0) {
+        // Losowe przetasowanie wylosowanego odcinka sciezki
         int v1 = RandomDataGenerator::generateVertexInRange(0, matrixSize - 1);
         int v2;
         do {
@@ -220,23 +222,18 @@ std::pair<std::vector<int>, int> TabuSearch::generateDiversificationCandidate() 
         std::shuffle(candidatePath.begin() + v1, candidatePath.begin() + v2, gen);
 
         candidatePath.push_back(candidatePath[0]);
+        candidateCost = calculatePathCost(matrix, candidatePath);
     } else {
+        // Odwracanie fragmentow sciezki
         std::vector<int> tmp;
-
         for (int i = 0; i < matrixSize; i++) {
             for (int j = i + 1; j < matrixSize; j++) {
                 tmp = bestPath;
                 tmp.pop_back();
                 std::reverse(tmp.begin() + i, tmp.begin() + j);
-                tmp.push_back(tmp.front());
+                tmp.push_back(tmp[0]);
 
-                auto currentV = tmp.begin();
-                auto nextV = ++tmp.begin();
-                int tmpCost = 0;
-                for (; nextV != tmp.end(); currentV++) {
-                    tmpCost += matrix[*currentV][*nextV];
-                    nextV++;
-                }
+                int tmpCost = calculatePathCost(matrix, tmp);
 
                 if (tmpCost < candidateCost) {
                     candidatePath = tmp;
@@ -248,8 +245,6 @@ std::pair<std::vector<int>, int> TabuSearch::generateDiversificationCandidate() 
             }
         }
     }
-
-    candidateCost = calculatePathCost(matrix, candidatePath);
     return std::make_pair(candidatePath, candidateCost);
 }
 
