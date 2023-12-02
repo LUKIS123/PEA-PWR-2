@@ -36,3 +36,17 @@ std::pair<std::vector<int>, int> GreedyAlgorithm::solveGreedyAlgorithm(int **mat
 
     return std::make_pair(path, distance);
 }
+
+std::pair<std::vector<int>, int> GreedyAlgorithm::getBestGreedyAlgorithmResult(int **matrix, int matrixSize) {
+    int bestCost = INT_MAX;
+    std::vector<int> bestPath;
+
+    for (int i = 0; i < matrixSize; i++) {
+        auto solution = solveGreedyAlgorithm(matrix, matrixSize, i);
+        if (solution.second < bestCost) {
+            bestPath = solution.first;
+            bestCost = solution.second;
+        }
+    }
+    return std::make_pair(bestPath, bestCost);
+}

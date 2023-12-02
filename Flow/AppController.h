@@ -9,6 +9,7 @@
 #include "./LatestAlgorithmRan.h"
 #include "../Matrix/ATSPMatrix.h"
 #include "../MeasureTime/Timer.h"
+#include "../FileUtils/DataFileUtility.h"
 #include "../Solutions/SimulatedAnnealing.h"
 #include "../Solutions/TabuSearch.h"
 
@@ -22,16 +23,15 @@ private:
             "SIMULATED ANNEALING",
             "TABU SEARCH"
     };
+    std::string resultPathFileName = "latest_result_path";
+    int testNumber = 10;
 
     LatestAlgorithm latestRun = LatestAlgorithm::NONE;
+    long long int latestTimerStart;
     double latestTimerResult = 0.0;
 
-    // SA
+    // SA PARAMS
     double alphaFactor = 0.99;
-
-    // TABU SEARCH
-    int tabuMaxIterations = 1000000;
-    int cadence = 100;
 
     // SHARED
     int timeoutSeconds = 120;
@@ -59,7 +59,11 @@ public:
 
     void displayLatestResults();
 
-    void setTSParams();
+    void readPathAndDisplayCalculatedCost();
+
+    void testSimulatedAnnealing();
+
+    void testTabuSearch();
 };
 
 

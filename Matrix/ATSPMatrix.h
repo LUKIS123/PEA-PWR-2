@@ -2,6 +2,7 @@
 #define PEA_PWR_2_ATSPMATRIX_H
 
 #include <iostream>
+#include <vector>
 #include <fstream>
 
 class ATSPMatrix {
@@ -24,6 +25,8 @@ public:
     void loadFromFile(const std::string &filename);
 
     void displayMatrix();
+
+    void calculatePathCost(const std::vector<int> &path);
 
 private:
     void clearData();

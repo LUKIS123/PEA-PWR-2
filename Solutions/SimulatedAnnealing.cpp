@@ -1,5 +1,13 @@
 #include "SimulatedAnnealing.h"
 
+
+void SimulatedAnnealing::clearMemory() {
+    currentPath.clear();
+    bestPath.clear();
+    currentCost = INT_MAX;
+    bestCost = INT_MAX;
+}
+
 void SimulatedAnnealing::displayLatestResults() {
     std::cout << "Greedy algo cost: " << greedyAlgorithmCost << std::endl;
     std::cout << "SIMULATED ANNEALING RESULTS:" << std::endl;
@@ -9,18 +17,19 @@ void SimulatedAnnealing::displayLatestResults() {
     }
     std::cout << std::endl;
     std::cout << "SIMULATED ANNEALING Cost: " << bestCost << std::endl;
-    std::cout << "END TEMPERATURE [Tk] : " << currentTemperature << std::endl;
-    std::cout << "exp(-1/Tk): " << exp(-1 / currentTemperature) << std::endl;
+    std::cout << "END TEMPERATURE [Tk]: " << currentTemperature << std::endl;
+    std::cout << "exp(-1/Tk): " << exp((-1 / currentTemperature)) << std::endl;
 }
 
 void SimulatedAnnealing::mainFun(ATSPMatrix *ATSPMatrix, double alpha, int timeout) {
+    clearMemory();
+
     this->matrix = ATSPMatrix->getMatrix();
     this->matrixSize = ATSPMatrix->getSize();
     this->coolingFactor = alpha;
     this->timeoutSeconds = timeout;
 
-    int startingVertex = RandomDataGenerator::generateVertexInRange(0, matrixSize - 1);
-    auto pathCostPair = GreedyAlgorithm::solveGreedyAlgorithm(matrix, matrixSize, startingVertex);
+    auto pathCostPair = GreedyAlgorithm::getBestGreedyAlgorithmResult(matrix, matrixSize);
     greedyAlgorithmCost = pathCostPair.second;
     currentPath = pathCostPair.first;
     currentCost = greedyAlgorithmCost;
@@ -29,9 +38,7 @@ void SimulatedAnnealing::mainFun(ATSPMatrix *ATSPMatrix, double alpha, int timeo
 
     startingTemperature = calculateInitialTemperature(matrix, matrixSize);
     currentTemperature = startingTemperature;
-    singleStepLength = matrixSize * matrixSize;
-
-    breakTemperature = std::pow(10.0, -9);
+    singleStepLength = matrixSize * 10;
 
     solveTSP();
 }
@@ -41,7 +48,7 @@ void SimulatedAnnealing::solveTSP() {
                                                  std::chrono::duration_cast<std::chrono::seconds>(
                                                          std::chrono::duration<int>(timeoutSeconds)
                                                  );
-    while (currentTemperature > breakTemperature) {
+    while ((breakAlgoTimePoint - std::chrono::system_clock::now()).count() > 0) {
         for (int step = 0; step < singleStepLength; step++) {
             auto changedPath = perturbPath(currentPath, matrixSize);
             int changedPathCost = calculateCost(matrix, changedPath);
@@ -51,6 +58,7 @@ void SimulatedAnnealing::solveTSP() {
                 if (changedPathCost <= bestCost) {
                     bestPath = changedPath;
                     bestCost = changedPathCost;
+                    bestCostFoundQPC = Timer::read_QPC();
                 }
             } else {
                 if (acceptanceFunction(currentCost, changedPathCost, currentTemperature)) {
@@ -61,12 +69,6 @@ void SimulatedAnnealing::solveTSP() {
         }
         // Schladzanie temperatury po petli for
         currentTemperature = CoolingFunctions::updateWithLinearCooling(currentTemperature, coolingFactor);
-
-        // Przerwanie petli po przekroczeniu kryterium stopu
-        if ((breakAlgoTimePoint - std::chrono::system_clock::now()).count() < 0) {
-            break;
-        }
-
     }
 }
 
@@ -124,14 +126,14 @@ double SimulatedAnnealing::calculateInitialTemperature(int **matrix, int size) {
         }
     }
 
-    double averageCostChange = totalCostChange / (movesCount * steps);
+    double averageCostChange = (totalCostChange / (movesCount * steps));
     return -averageCostChange / log(0.85);
 }
 
 std::pair<std::vector<int>, int> SimulatedAnnealing::generateRandomSolution() {
     std::vector<int> path(matrixSize);
     std::iota(std::begin(path), std::end(path), 0);
-    for (int i = 0; i < matrixSize * matrixSize; i++) {
+    for (int i = 0; i < matrixSize * 2; i++) {
         int v1 = RandomDataGenerator::generateVertexInRange(0, matrixSize - 1);
         int v2;
         do {

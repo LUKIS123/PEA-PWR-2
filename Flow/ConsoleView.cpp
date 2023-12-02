@@ -7,11 +7,11 @@ ActionResult::mainMenu ConsoleView::mainMenu() {
     std::cout << "2 => Display matrix" << std::endl;
     std::cout << "3 => Display latest result" << std::endl;
     std::cout << "4 => Set timeout" << std::endl;
-    std::cout << "5 => Set alpha factor" << std::endl;
-    std::cout << "6 => RUN:     SIMULATED ANNEALING" << std::endl;
-    std::cout << "7 => Set TS parameters" << std::endl;
-    std::cout << "8 => RUN:     TABU SEARCH" << std::endl;
-    std::cout << "9 => TESTS" << std::endl;
+    std::cout << "5 => Set SA alpha factor" << std::endl;
+    std::cout << "6 => RUN ---> SIMULATED ANNEALING" << std::endl;
+    std::cout << "7 => RUN ---> TABU SEARCH" << std::endl;
+    std::cout << "8 => Auto Tests" << std::endl;
+    std::cout << "9 => Read and calculate path cost" << std::endl;
     std::cout << "0 => Exit" << std::endl;
 
     std::cout << "Choice: ";
@@ -38,11 +38,11 @@ ActionResult::mainMenu ConsoleView::mainMenu() {
         case 6:
             return ActionResult::RUN_ANNEALING;
         case 7:
-            return ActionResult::SET_TS_PARAMS;
-        case 8:
             return ActionResult::RUN_TABU_SEARCH;
-        case 9:
+        case 8:
             return ActionResult::RUN_TESTS;
+        case 9:
+            return ActionResult::READ_AND_CALCULATE_SAVED_PATH;
         case 0:
             return ActionResult::END;
         default:
@@ -50,14 +50,11 @@ ActionResult::mainMenu ConsoleView::mainMenu() {
     }
 }
 
-// TODO...
 ActionResult::automaticTestsMenu ConsoleView::automaticTestsMenu() {
     system("CLS");
     std::cout << "AUTOMATIC TESTS: Choose from given options..." << std::endl;
-    std::cout << "1 => Test BRUTE FORCE" << std::endl;
-    std::cout << "2 => Test BRANCH AND BOUND" << std::endl;
-    std::cout << "3 => Test DYNAMIC PROGRAMMING" << std::endl;
-    std::cout << "4 => Change Test Count" << std::endl;
+    std::cout << "1 => Test SIMULATED ANNEALING" << std::endl;
+    std::cout << "2 => Test TABU SEARCH" << std::endl;
     std::cout << "0 => Exit" << std::endl;
 
     std::cout << "Choice: ";
@@ -69,12 +66,13 @@ ActionResult::automaticTestsMenu ConsoleView::automaticTestsMenu() {
         std::cout << "Bad entry... Enter a NUMBER: ";
         std::cin >> next;
     }
-
     switch (next) {
-        case 4:
-            return ActionResult::automaticTestsMenu::SET_TEST_COUNT;
         case 0:
             return ActionResult::automaticTestsMenu::END_TEST;
+        case 1:
+            return ActionResult::automaticTestsMenu::TEST_SA;
+        case 2:
+            return ActionResult::automaticTestsMenu::TEST_TS;
         default:
             return ActionResult::automaticTestsMenu::MENU_TEST;
     }
