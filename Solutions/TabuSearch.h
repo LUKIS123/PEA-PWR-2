@@ -22,9 +22,9 @@ private:
     int matrixSize;
     int timeoutSeconds = 120;
 
-    int maxIterations = 1000000000;
     int tabuIterationsCadence;
     int **tabuMoves = nullptr;
+    int diversificationEventCounter = 0;
 
     int masterListValidity = 10;
     std::list<std::pair<std::pair<int, int>, int>> neighboursMasterList;
@@ -32,12 +32,10 @@ private:
     class comp {
     public:
         bool
-        operator()(std::pair<std::pair<int, int>, int> const &a, std::pair<std::pair<int, int>, int> const &b) const {
+        operator()(const std::pair<std::pair<int, int>, int> &a, const std::pair<std::pair<int, int>, int> &b) {
             return a.second < b.second;
         }
     };
-
-    std::priority_queue<std::pair<std::pair<int, int>, int>, std::vector<std::pair<std::pair<int, int>, int>>, comp> neighboursPQ;
 
 public:
     int greedyAlgorithmCost;
@@ -62,8 +60,8 @@ public:
 
     int getSwappedPathCost(int v1, int v2, std::vector<int> path);
 
-    std::vector<std::pair<std::pair<int, int>, int>>
-    filterTabuSwaps(std::vector<std::pair<std::pair<int, int>, int>> path);
+    std::list<std::pair<std::pair<int, int>, int>>
+    filterTabuSwaps(const std::vector<std::pair<std::pair<int, int>, int>> &allNeighbours);
 
     void updateTabuList(int v1, int v2);
 
