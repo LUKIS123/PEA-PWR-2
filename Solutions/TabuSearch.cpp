@@ -95,7 +95,7 @@ void TabuSearch::solveTSP() {
             lastMasterListElementCost = neighboursMasterList.back().second;
         } else {
             updateMasterListCosts(neighboursMasterList, currentPath);
-            if (neighboursMasterList.back().second > (lastMasterListElementCost * 1.05)) {
+            if (neighboursMasterList.front().second > (lastMasterListElementCost * 1.03)) {
                 neighboursMasterList = getNextMovesFromNeighboursMasterList(currentPath);
                 lastMasterListElementCost = neighboursMasterList.back().second;
             }
@@ -264,6 +264,7 @@ std::pair<std::vector<int>, int> TabuSearch::generateDiversificationCandidate() 
     return std::make_pair(candidatePath, candidateCost);
 }
 
+// Funkcja obliczajaca koszt sciezki
 int TabuSearch::calculatePathCost(int **matrix, const std::vector<int> &path) {
     auto currentV = path.begin();
     auto nextV = ++path.begin();
@@ -276,6 +277,8 @@ int TabuSearch::calculatePathCost(int **matrix, const std::vector<int> &path) {
     return newCost;
 }
 
+// Funkcja zwraca master liste sasiadow o zadanej dlugosci
+// (zawiera najlepszych sasiadow spoza tabu + kryterium aspiracji akceptujace rozwiazanie tabu jesli jego rozwiazanie jest lepsze od najlepszego aktualnego)
 std::list<std::pair<std::pair<int, int>, int>>
 TabuSearch::getNextMovesFromNeighboursMasterList(const std::vector<int> &solution) {
     auto allNeighboursSorted = getNextMovesFromNeighbours(solution);
@@ -310,13 +313,19 @@ TabuSearch::getNextMovesFromNeighboursMasterList(const std::vector<int> &solutio
     return masterList;
 }
 
+// Funkcja sluzaca aktualizacji kosztow master listy sasiadow
 void
 TabuSearch::updateMasterListCosts(std::list<std::pair<std::pair<int, int>, int>> &masterList, std::vector<int> &path) {
     for (auto &item: masterList) {
         item.second = getSwappedPathCost(item.first.first, item.first.second, path);
     }
+
+    neighboursMasterList.sort([](const std::pair<std::pair<int, int>, int> &a,
+                                 const std::pair<std::pair<int, int>, int> &b) { return a.second < b.second; }
+    );
 }
 
+// Funkcja sluzaca zamianie dwoch wybranych wierzcholkow w sciezce
 void TabuSearch::swapVectorElements(int v1, int v2, std::vector<int> &path) const {
     int index1 = INT_MIN, index2 = INT_MIN;
     for (int i = 0; i < matrixSize; ++i) {
