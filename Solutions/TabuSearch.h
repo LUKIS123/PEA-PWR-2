@@ -9,7 +9,6 @@
 #include <cmath>
 #include <chrono>
 #include <random>
-#include <queue>
 #include "../Matrix/ATSPMatrix.h"
 #include "./Utils/GreedyAlgorithm.h"
 #include "../RandomDataGenerator/RandomDataGenerator.h"

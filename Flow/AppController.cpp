@@ -171,7 +171,7 @@ void AppController::displayLatestResults() {
     if (latestRun == LatestAlgorithm::SA) {
         annealing->displayLatestResults();
         std::cout << "Best result found after: " <<
-                  Timer::getSecondsElapsed(latestTimerStart, tabuSearch->bestCostFoundQPC) << " s" << std::endl;
+                  Timer::getSecondsElapsed(latestTimerStart, annealing->bestCostFoundQPC) << " s" << std::endl;
     }
     if (latestRun == LatestAlgorithm::TABU) {
         tabuSearch->displayLatestResults();
@@ -191,6 +191,12 @@ void AppController::readPathAndDisplayCalculatedCost() {
 }
 
 void AppController::testsMenu() {
+    if (!matrix->exists) {
+        std::cout << "MATRIX IS EMPTY" << std::endl;
+        system("PAUSE");
+        return;
+    }
+
     system("CLS");
     std::cout << "AUTOMATIC TESTS Initialization..." << std::endl;
     std::cout << std::endl << "Set number of tests..." << std::endl;
@@ -227,10 +233,14 @@ void AppController::testSimulatedAnnealing() {
     std::string fileName = "simulated_annealing_tests.csv";
     std::string bestResultPathFileName = "simulated_annealing_tests_bestpath";
 
-    std::string cols = "us,ms,s";
+    std::string cols = "us,ms,s,greedy_c,sol_cost,end_temp,exp,factor";
     std::vector<double> resultsUS;
     std::vector<double> resultsMS;
     std::vector<double> resultsS;
+    std::vector<int> greedyCosts;
+    std::vector<int> solCosts;
+    std::vector<double> endTemp;
+    std::vector<double> exps;
 
     int bestCost = INT_MAX;
     std::vector<int> bestPath;
@@ -240,12 +250,17 @@ void AppController::testSimulatedAnnealing() {
     for (int i = 0; i < testNumber; i++) {
         start = Timer::read_QPC();
         annealing->mainFun(matrix, alphaFactor, timeoutSeconds);
-        end = Timer::read_QPC();
+        end = annealing->bestCostFoundQPC;
 
         results = Timer::getMicroSecondsElapsed(start, end);
         resultsUS.push_back(results);
         resultsMS.push_back(results / 1000);
         resultsS.push_back(results / 1000000);
+
+        greedyCosts.push_back(annealing->greedyAlgorithmCost);
+        solCosts.push_back(annealing->bestCost);
+        endTemp.push_back(annealing->currentTemperature);
+        exps.push_back(exp((-1 / annealing->currentTemperature)));
 
         if (annealing->bestCost <= bestCost) {
             bestCost = annealing->bestCost;
@@ -253,7 +268,8 @@ void AppController::testSimulatedAnnealing() {
         }
     }
 
-    DataFileUtility::saveAutomaticTestResults(fileName, resultsUS, resultsMS, resultsS, cols);
+    DataFileUtility::saveAutomaticSATestResults(fileName, resultsUS, resultsMS, resultsS, greedyCosts, solCosts,
+                                                endTemp, exps, alphaFactor, cols);
     DataFileUtility::saveResultPath(bestResultPathFileName, bestPath);
     std::cout << "Done!" << std::endl;
     system("PAUSE");
@@ -263,10 +279,12 @@ void AppController::testTabuSearch() {
     std::string fileName = "tabu_search_tests.csv";
     std::string bestResultPathFileName = "tabu_search_tests_bestpath";
 
-    std::string cols = "us,ms,s";
+    std::string cols = "us,ms,s,greedy_c,sol_cost";
     std::vector<double> resultsUS;
     std::vector<double> resultsMS;
     std::vector<double> resultsS;
+    std::vector<int> greedyCosts;
+    std::vector<int> solCosts;
 
     int bestCost = INT_MAX;
     std::vector<int> bestPath;
@@ -276,20 +294,23 @@ void AppController::testTabuSearch() {
     for (int i = 0; i < testNumber; i++) {
         start = Timer::read_QPC();
         tabuSearch->mainFun(matrix, timeoutSeconds);
-        end = Timer::read_QPC();
+        end = tabuSearch->bestCostFoundQPC;
 
         results = Timer::getMicroSecondsElapsed(start, end);
         resultsUS.push_back(results);
         resultsMS.push_back(results / 1000);
         resultsS.push_back(results / 1000000);
 
-        if (tabuSearch->currentBestCost <= bestCost) {
-            bestCost = tabuSearch->currentBestCost;
-            bestPath = tabuSearch->currentBestPath;
+        greedyCosts.push_back(tabuSearch->greedyAlgorithmCost);
+        solCosts.push_back(tabuSearch->bestSolutionFirstOccurrenceCost);
+
+        if (tabuSearch->bestSolutionFirstOccurrenceCost <= bestCost) {
+            bestCost = tabuSearch->bestSolutionFirstOccurrenceCost;
+            bestPath = tabuSearch->bestSolutionFirstOccurrence;
         }
     }
 
-    DataFileUtility::saveAutomaticTestResults(fileName, resultsUS, resultsMS, resultsS, cols);
+    DataFileUtility::saveAutomaticTSTestResults(fileName, resultsUS, resultsMS, resultsS, greedyCosts, solCosts, cols);
     DataFileUtility::saveResultPath(bestResultPathFileName, bestPath);
     std::cout << "Done!" << std::endl;
     system("PAUSE");
