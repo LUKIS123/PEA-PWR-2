@@ -28,6 +28,7 @@ private:
 
     int masterListValidity = 10;
     std::list<std::pair<std::pair<int, int>, int>> neighboursMasterList;
+    int lastMasterListElementCost;
 
     class comp {
     public:
@@ -43,9 +44,12 @@ public:
     std::vector<int> currentPath;
     int currentCost = INT_MAX;
 
-    std::vector<int> bestPath;
-    int bestCost = INT_MAX;
+    std::vector<int> currentBestPath;
+    int currentBestCost = INT_MAX;
+
     long long int bestCostFoundQPC;
+    std::vector<int> bestSolutionFirstOccurrence;
+    int bestSolutionFirstOccurrenceCost = INT_MAX;
 
     virtual ~TabuSearch();
 

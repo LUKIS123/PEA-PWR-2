@@ -2,6 +2,7 @@
 
 
 void SimulatedAnnealing::clearMemory() {
+    bestCostFoundQPC = Timer::read_QPC();
     currentPath.clear();
     bestPath.clear();
     currentCost = INT_MAX;
@@ -21,6 +22,7 @@ void SimulatedAnnealing::displayLatestResults() {
     std::cout << "exp(-1/Tk): " << exp((-1 / currentTemperature)) << std::endl;
 }
 
+// Wyznaczanie wspolczynnikow i uruchomienie algorytmu
 void SimulatedAnnealing::mainFun(ATSPMatrix *ATSPMatrix, double alpha, int timeout) {
     clearMemory();
 
@@ -43,6 +45,7 @@ void SimulatedAnnealing::mainFun(ATSPMatrix *ATSPMatrix, double alpha, int timeo
     solveTSP();
 }
 
+// Funckja zawierajaca glowna petle algorytmu
 void SimulatedAnnealing::solveTSP() {
     std::chrono::time_point breakAlgoTimePoint = std::chrono::system_clock::now() +
                                                  std::chrono::duration_cast<std::chrono::seconds>(
@@ -55,7 +58,7 @@ void SimulatedAnnealing::solveTSP() {
             if (changedPathCost <= currentCost) {
                 currentPath = changedPath;
                 currentCost = changedPathCost;
-                if (changedPathCost <= bestCost) {
+                if (changedPathCost < bestCost) {
                     bestPath = changedPath;
                     bestCost = changedPathCost;
                     bestCostFoundQPC = Timer::read_QPC();
@@ -67,11 +70,12 @@ void SimulatedAnnealing::solveTSP() {
                 }
             }
         }
-        // Schladzanie temperatury po petli for
+        // Schladzanie temperatury po petli for (schodkowe zmniejszanie temperatury)
         currentTemperature = CoolingFunctions::updateWithLinearCooling(currentTemperature, coolingFactor);
     }
 }
 
+// Funkcja zwracajaca decyzje o akceptacji badz odrzuceniu rozwiazania na podstawie prawdopodobienstwa wyznaczonego ze wzoru dla algorytmu SW
 bool SimulatedAnnealing::acceptanceFunction(int currentVertexWeight, int nextVertexWeight, double temperature) {
     double probability = std::min(1.0, std::exp((double) (-(nextVertexWeight - currentVertexWeight) / temperature)));
     double random = RandomDataGenerator::generateRandomDouble(0, 1);
@@ -82,6 +86,7 @@ bool SimulatedAnnealing::acceptanceFunction(int currentVertexWeight, int nextVer
     }
 }
 
+// Funkcja sluzaca do obliczenia kosztu sciezki (cyklu Hamiltona)
 int SimulatedAnnealing::calculateCost(int **matrix, const std::vector<int> &path) {
     auto currentV = path.begin();
     auto nextV = ++path.begin();
@@ -94,8 +99,8 @@ int SimulatedAnnealing::calculateCost(int **matrix, const std::vector<int> &path
     return newCost;
 }
 
+// Funckja generujaca nowe rozwiazanie (sasiada) poprzez losowa zamiane 2 wierzcholkow
 std::vector<int> SimulatedAnnealing::perturbPath(std::vector<int> path, int size) {
-    // TODO: do ewentuiualenj poprawy, nie trzeba liczyc calego kosztu sciezki na nowo, wystarczy zmeinic wierzcholki przed i po swapnietym
     path.pop_back();
     int v1 = RandomDataGenerator::generateVertexInRange(0, size - 1);
     int v2;
@@ -108,6 +113,7 @@ std::vector<int> SimulatedAnnealing::perturbPath(std::vector<int> path, int size
     return path;
 }
 
+// Funckja sluzaca do wyznaczanie poczatkowej temperatury na podstawie sredniego kosztu ruchu w grafie (ruchy wykonywane sa w sposob losowy)
 double SimulatedAnnealing::calculateInitialTemperature(int **matrix, int size) {
     int movesCount = 100;
     if (matrixSize > 100) {
@@ -130,6 +136,7 @@ double SimulatedAnnealing::calculateInitialTemperature(int **matrix, int size) {
     return -averageCostChange / log(0.85);
 }
 
+// Funckja pomocnicza dla funkcji wyznaczajacej temperature poczatkowa, sluzaca wygenerowaniu losowej sciezki
 std::pair<std::vector<int>, int> SimulatedAnnealing::generateRandomSolution() {
     std::vector<int> path(matrixSize);
     std::iota(std::begin(path), std::end(path), 0);

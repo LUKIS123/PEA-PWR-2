@@ -114,6 +114,7 @@ void AppController::runSimulatedAnnealing() {
         system("PAUSE");
         return;
     }
+    std::cout << "Cooling factor: " << alphaFactor << std::endl;
     long long start = Timer::read_QPC();
     annealing->mainFun(matrix, alphaFactor, timeoutSeconds);
     long long end = Timer::read_QPC();
@@ -125,7 +126,7 @@ void AppController::runSimulatedAnnealing() {
     std::cout << "Timer: " << latestTimerResult / 1000 << " ms" << std::endl;
     std::cout << "     : " << latestTimerResult / 1000000 << " s" << std::endl;
     std::cout << "Best result found after: " <<
-              Timer::getSecondsElapsed(start, annealing->bestCostFoundQPC) << " s" << std::endl;
+              Timer::getMicroSecondsElapsed(start, annealing->bestCostFoundQPC) / 1000000 << " s" << std::endl;
 
     DataFileUtility::saveResultPath(resultPathFileName, annealing->bestPath);
     system("PAUSE");
@@ -148,9 +149,9 @@ void AppController::runTabuSearch() {
     std::cout << "Timer: " << latestTimerResult / 1000 << " ms" << std::endl;
     std::cout << "     : " << latestTimerResult / 1000000 << " s" << std::endl;
     std::cout << "Best result found after: " <<
-              Timer::getSecondsElapsed(start, tabuSearch->bestCostFoundQPC) << " s" << std::endl;
+              Timer::getMicroSecondsElapsed(start, tabuSearch->bestCostFoundQPC) / 1000000 << " s" << std::endl;
 
-    DataFileUtility::saveResultPath(resultPathFileName, tabuSearch->bestPath);
+    DataFileUtility::saveResultPath(resultPathFileName, tabuSearch->bestSolutionFirstOccurrence);
     system("PAUSE");
 }
 
@@ -282,9 +283,9 @@ void AppController::testTabuSearch() {
         resultsMS.push_back(results / 1000);
         resultsS.push_back(results / 1000000);
 
-        if (tabuSearch->bestCost <= bestCost) {
-            bestCost = tabuSearch->bestCost;
-            bestPath = tabuSearch->bestPath;
+        if (tabuSearch->currentBestCost <= bestCost) {
+            bestCost = tabuSearch->currentBestCost;
+            bestPath = tabuSearch->currentBestPath;
         }
     }
 

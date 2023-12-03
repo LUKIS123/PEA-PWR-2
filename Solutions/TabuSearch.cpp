@@ -11,11 +11,14 @@ TabuSearch::~TabuSearch() {
 }
 
 void TabuSearch::clearMemory() {
+    bestCostFoundQPC = Timer::read_QPC();
     neighboursMasterList.clear();
     currentPath.clear();
-    bestPath.clear();
+    currentBestPath.clear();
+    bestSolutionFirstOccurrence.clear();
     currentCost = INT_MAX;
-    bestCost = INT_MAX;
+    currentBestCost = INT_MAX;
+    bestSolutionFirstOccurrenceCost = INT_MAX;
     diversificationEventCounter = 0;
     if (tabuMoves != nullptr) {
         for (int i = 0; i < matrixSize; i++) {
@@ -29,11 +32,11 @@ void TabuSearch::displayLatestResults() {
     std::cout << "Greedy algo cost: " << greedyAlgorithmCost << std::endl;
     std::cout << "TABU SEARCH RESULTS:" << std::endl;
     std::cout << "Path: ";
-    for (const auto &item: bestPath) {
+    for (const auto &item: bestSolutionFirstOccurrence) {
         std::cout << item << ", ";
     }
     std::cout << std::endl;
-    std::cout << "TABU SEARCH Cost: " << bestCost << std::endl;
+    std::cout << "TABU SEARCH Cost: " << bestSolutionFirstOccurrenceCost << std::endl;
 }
 
 void TabuSearch::mainFun(ATSPMatrix *ATSPMatrix, int timeout) {
@@ -48,16 +51,17 @@ void TabuSearch::mainFun(ATSPMatrix *ATSPMatrix, int timeout) {
     greedyAlgorithmCost = pathCostPair.second;
     currentPath = pathCostPair.first;
     currentCost = greedyAlgorithmCost;
-    bestPath = currentPath;
-    bestCost = currentCost;
+    currentBestPath = currentPath;
+    currentBestCost = currentCost;
+    bestSolutionFirstOccurrenceCost = currentBestCost;
 
     tabuMoves = new int *[matrixSize];
-    for (int i = 0; i < matrixSize; i++) {
+    for (int i = 0; i < matrixSize; ++i) {
         tabuMoves[i] = new int[matrixSize];
     }
     int currentFillCount = 1;
-    for (int i = 0; i < matrixSize; i++) {
-        for (int j = 0; j < matrixSize; j++) {
+    for (int i = 0; i < matrixSize; ++i) {
+        for (int j = 0; j < matrixSize; ++j) {
             if (j < currentFillCount) {
                 tabuMoves[i][j] = INT_MAX;
             } else {
@@ -68,9 +72,9 @@ void TabuSearch::mainFun(ATSPMatrix *ATSPMatrix, int timeout) {
     }
 
     if (matrixSize > 200) {
-        masterListValidity = (int) (matrixSize * 0.04);
+        masterListValidity = (int) (matrixSize * 0.05);
     } else {
-        masterListValidity = 7;
+        masterListValidity = 10;
     }
 
     solveTSP();
@@ -81,7 +85,6 @@ void TabuSearch::solveTSP() {
                                                  std::chrono::duration_cast<std::chrono::seconds>(
                                                          std::chrono::duration<int>(timeoutSeconds)
                                                  );
-    int iteration = 0;
     int iterationsWithoutImprovement = 0;
 
     while ((breakAlgoTimePoint - std::chrono::system_clock::now()).count() > 0) {
@@ -89,8 +92,13 @@ void TabuSearch::solveTSP() {
         // tworznie master listy zawierajacej n elementow, aktualizowana co jakis czas
         if (neighboursMasterList.empty()) {
             neighboursMasterList = getNextMovesFromNeighboursMasterList(currentPath);
+            lastMasterListElementCost = neighboursMasterList.back().second;
         } else {
             updateMasterListCosts(neighboursMasterList, currentPath);
+            if (neighboursMasterList.back().second > (lastMasterListElementCost * 1.05)) {
+                neighboursMasterList = getNextMovesFromNeighboursMasterList(currentPath);
+                lastMasterListElementCost = neighboursMasterList.back().second;
+            }
         }
 
         std::pair<int, int> nextVertexPair = neighboursMasterList.front().first;
@@ -102,16 +110,20 @@ void TabuSearch::solveTSP() {
         currentCost = nextVertexPairSwapCost;
 
         // Aktualizacja licznika uruchomienia strategii dywersyfikacji
-        if (currentCost >= bestCost) {
+        if (currentCost >= currentBestCost) {
             ++iterationsWithoutImprovement;
         } else {
             iterationsWithoutImprovement = 0;
         }
         // Aktualizacja najlepszego rozwiazania
-        if (currentCost <= bestCost) {
-            bestPath = currentPath;
-            bestCost = currentCost;
-            bestCostFoundQPC = Timer::read_QPC();
+        if (currentCost <= currentBestCost) {
+            currentBestPath = currentPath;
+            currentBestCost = currentCost;
+            if (currentCost < bestSolutionFirstOccurrenceCost) {
+                bestCostFoundQPC = Timer::read_QPC();
+                bestSolutionFirstOccurrenceCost = currentCost;
+                bestSolutionFirstOccurrence = currentPath;
+            }
         }
 
         // Aktualizacja listy tabu
@@ -125,28 +137,27 @@ void TabuSearch::solveTSP() {
             auto bestDiversificationCandidate = generateDiversificationCandidate();
             currentPath = bestDiversificationCandidate.first;
             currentCost = bestDiversificationCandidate.second;
-            if (currentCost <= bestCost) {
-                bestPath = currentPath;
-                bestCost = currentCost;
+            if (currentCost <= currentBestCost) {
+                currentBestPath = currentPath;
+                currentBestCost = currentCost;
                 bestCostFoundQPC = Timer::read_QPC();
             }
 
             iterationsWithoutImprovement = 0;
             ++diversificationEventCounter;
 
-            if (diversificationEventCounter % 2 == 0) {
+            if (diversificationEventCounter % 3 != 0) {
                 neighboursMasterList = getNextMovesFromNeighboursMasterList(currentPath);
             }
 
         }
 
-        iteration++;
     }
 }
 
+// Funkcja generujaca liste sasiadow wedlug definicji sasiedztwa polegajacej na zamianie 2 wierzcholkow
 std::vector<std::pair<std::pair<int, int>, int>>
 TabuSearch::getNextMovesFromNeighbours(const std::vector<int> &solution) {
-    // todo moze zamienic na set!!!
     auto neighbourList = std::vector<std::pair<std::pair<int, int>, int>>();
     neighbourList.reserve((matrixSize * matrixSize) / 2);
     for (int i = 0; i < matrixSize - 1; i++) {
@@ -159,6 +170,7 @@ TabuSearch::getNextMovesFromNeighbours(const std::vector<int> &solution) {
     return neighbourList;
 }
 
+// Funkcja zwracajaca koszt potencjalnej zamiany wierzcholkow
 int TabuSearch::getSwappedPathCost(int v1, int v2, std::vector<int> path) {
     path.pop_back();
     swapVectorElements(v1, v2, path);
@@ -174,6 +186,7 @@ int TabuSearch::getSwappedPathCost(int v1, int v2, std::vector<int> path) {
     return newCost;
 }
 
+// Funkcja sluzaca odrzuceniu sasiadow bedacych w liscie tabu
 std::list<std::pair<std::pair<int, int>, int>>
 TabuSearch::filterTabuSwaps(const std::vector<std::pair<std::pair<int, int>, int>> &allNeighbours) {
     std::list<std::pair<std::pair<int, int>, int>> filtered;
@@ -197,24 +210,47 @@ void TabuSearch::updateTabuList(int v1, int v2) {
     tabuMoves[v1][v2] = tabuIterationsCadence;
 }
 
+// Funkcja generujaca nowe rozwiazanie (strategia dywersyfikacji po okreslonej liczbie iteracji bez znalezienie lepszego rozwiazania)
 std::pair<std::vector<int>, int> TabuSearch::generateDiversificationCandidate() {
-    std::cout << "Current: " << currentCost << ", Best: " << bestCost << std::endl;
+    std::cout << "Current: " << currentCost << ", Best: " << currentBestCost << std::endl;
 
     int candidateCost = INT_MAX;
     std::vector<int> candidatePath;
 
-    if (diversificationEventCounter % 2 == 0) {
-        // Losowe przetasowanie wylosowanego odcinka sciezki
+    if (diversificationEventCounter % 3 == 0) {
+        // Odwracanie fragmentow sciezki
+        std::vector<int> tmp;
+        for (int i = 0; i < matrixSize; i++) {
+            for (int j = i + 1; j < matrixSize; j++) {
+                tmp = currentBestPath;
+                tmp.pop_back();
+                std::reverse(tmp.begin() + i, tmp.begin() + j);
+                tmp.push_back(tmp[0]);
+
+                int tmpCost = calculatePathCost(matrix, tmp);
+
+                if (tmpCost <= candidateCost) {
+                    candidatePath = tmp;
+                    candidateCost = tmpCost;
+                    if (candidateCost < currentBestCost) {
+                        break;
+                    }
+                }
+            }
+        }
+
+    } else {
+        // Przetasowanie wylosowanego odcinka sciezki, gdzie odcinek jest nie wiekszy od polowy sciezki
         int v1 = RandomDataGenerator::generateVertexInRange(0, matrixSize - 1);
         int v2;
         do {
             v2 = RandomDataGenerator::generateVertexInRange(0, matrixSize - 1);
-        } while (v2 == v1 || abs((v1 - v2)) == 1);
+        } while (v2 == v1 || abs((v1 - v2)) == 1 || abs((v1 - v2)) > (matrixSize / 2));
         if (v1 > v2) {
             std::swap(v1, v2);
         }
 
-        candidatePath = bestPath;
+        candidatePath = currentBestPath;
         candidatePath.pop_back();
 
         std::random_device rdev;
@@ -223,28 +259,8 @@ std::pair<std::vector<int>, int> TabuSearch::generateDiversificationCandidate() 
 
         candidatePath.push_back(candidatePath[0]);
         candidateCost = calculatePathCost(matrix, candidatePath);
-    } else {
-        // Odwracanie fragmentow sciezki
-        std::vector<int> tmp;
-        for (int i = 0; i < matrixSize; i++) {
-            for (int j = i + 1; j < matrixSize; j++) {
-                tmp = bestPath;
-                tmp.pop_back();
-                std::reverse(tmp.begin() + i, tmp.begin() + j);
-                tmp.push_back(tmp[0]);
-
-                int tmpCost = calculatePathCost(matrix, tmp);
-
-                if (tmpCost < candidateCost) {
-                    candidatePath = tmp;
-                    candidateCost = tmpCost;
-                    if (candidateCost < bestCost) {
-                        break;
-                    }
-                }
-            }
-        }
     }
+
     return std::make_pair(candidatePath, candidateCost);
 }
 
@@ -263,17 +279,31 @@ int TabuSearch::calculatePathCost(int **matrix, const std::vector<int> &path) {
 std::list<std::pair<std::pair<int, int>, int>>
 TabuSearch::getNextMovesFromNeighboursMasterList(const std::vector<int> &solution) {
     auto allNeighboursSorted = getNextMovesFromNeighbours(solution);
-    auto nonTabuNeighbours = filterTabuSwaps(allNeighboursSorted);
 
+    auto nonTabuNeighbours = filterTabuSwaps(allNeighboursSorted);
     if (nonTabuNeighbours.empty()) {
         std::copy(allNeighboursSorted.begin(), allNeighboursSorted.end(), std::back_inserter(nonTabuNeighbours));
     }
 
-    auto end = std::next(nonTabuNeighbours.begin(), std::min(masterListValidity, (int) nonTabuNeighbours.size()));
-    std::list<std::pair<std::pair<int, int>, int>> masterList(nonTabuNeighbours.begin(), end);
+    std::list<std::pair<std::pair<int, int>, int>> masterList;
+    for (const auto &item: nonTabuNeighbours) {
+
+        auto it = std::find_if(masterList.begin(), masterList.end(),
+                               [&item](std::pair<std::pair<int, int>, int> element) {
+                                   return element.first.first == item.first.first;
+                               });
+        if (it == masterList.end()) {
+            masterList.push_back(item);
+        }
+
+        if (masterList.size() == masterListValidity) {
+            break;
+        }
+    }
 
     auto bestNeighbour = allNeighboursSorted.front();
-    if (tabuMoves[bestNeighbour.first.first][bestNeighbour.first.second] != 0 && bestCost > bestNeighbour.second) {
+    if (tabuMoves[bestNeighbour.first.first][bestNeighbour.first.second] != 0 &&
+        currentBestCost > bestNeighbour.second) {
         masterList.push_front(bestNeighbour);
     }
 
