@@ -3,6 +3,7 @@
 
 #include "iostream"
 #include "vector"
+#include "../MeasureTime/Timer.h"
 
 class DataFileUtility {
 public:
@@ -23,6 +24,12 @@ public:
                                const std::vector<double> &ms,
                                const std::vector<double> &s, const std::vector<int> &greedyCosts,
                                const std::vector<int> &solCosts, const std::string &headline);
+
+    static bool
+    saveTimestamps(const std::string &FileName, const std::vector<std::vector<double>> &timestamps);
+
+    static bool
+    saveProgressionPoints(const std::string &FileName, const std::vector<std::vector<int>> &progressionPoints);
 };
 
 #endif //PEA_PWR_2_DATAFILEUTILITY_H

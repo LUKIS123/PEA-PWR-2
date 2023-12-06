@@ -116,7 +116,7 @@ void AppController::runSimulatedAnnealing() {
     }
     std::cout << "Cooling factor: " << alphaFactor << std::endl;
     long long start = Timer::read_QPC();
-    annealing->mainFun(matrix, alphaFactor, timeoutSeconds);
+    annealing->mainFun(matrix, alphaFactor, timeoutSeconds, 0);
     long long end = Timer::read_QPC();
     annealing->displayLatestResults();
     latestTimerResult = Timer::getMicroSecondsElapsed(start, end);
@@ -139,7 +139,7 @@ void AppController::runTabuSearch() {
         return;
     }
     long long start = Timer::read_QPC();
-    tabuSearch->mainFun(matrix, timeoutSeconds);
+    tabuSearch->mainFun(matrix, timeoutSeconds, 0);
     long long end = Timer::read_QPC();
     tabuSearch->displayLatestResults();
     latestTimerResult = Timer::getMicroSecondsElapsed(start, end);
@@ -230,8 +230,10 @@ void AppController::testsMenu() {
 }
 
 void AppController::testSimulatedAnnealing() {
-    std::string fileName = "simulated_annealing_tests.csv";
+    std::string fileName = "simulated_annealing_tests";
     std::string bestResultPathFileName = "simulated_annealing_tests_bestpath";
+    std::string timestampsFileName = "simulated_annealing_tests_timestamps";
+    std::string solutionProgressFileName = "simulated_annealing_tests_progress";
 
     std::string cols = "us,ms,s,greedy_c,sol_cost,end_temp,exp,factor";
     std::vector<double> resultsUS;
@@ -241,43 +243,84 @@ void AppController::testSimulatedAnnealing() {
     std::vector<int> solCosts;
     std::vector<double> endTemp;
     std::vector<double> exps;
+    std::vector<std::vector<double>> solutionTimestamps;
+    std::vector<std::vector<int>> solutionProgressPoints;
 
     int bestCost = INT_MAX;
     std::vector<int> bestPath;
 
+    // annela
+    //0.9998, 0.99988,
+    std::vector<double> alphas = {0.99975, 0.9998, 0.99985};
+    timeoutSeconds = 360;
+    int iter = 1;
+    testNumber = 10;
+    //
+
+    annealing->testing = true;
     long long int start, end;
     double results;
-    for (int i = 0; i < testNumber; i++) {
-        start = Timer::read_QPC();
-        annealing->mainFun(matrix, alphaFactor, timeoutSeconds);
-        end = annealing->bestCostFoundQPC;
 
-        results = Timer::getMicroSecondsElapsed(start, end);
-        resultsUS.push_back(results);
-        resultsMS.push_back(results / 1000);
-        resultsS.push_back(results / 1000000);
+    //
+    for (const auto &item: alphas) {
+        alphaFactor = item;
 
-        greedyCosts.push_back(annealing->greedyAlgorithmCost);
-        solCosts.push_back(annealing->bestCost);
-        endTemp.push_back(annealing->currentTemperature);
-        exps.push_back(exp((-1 / annealing->currentTemperature)));
+        for (int i = 0; i < testNumber; i++) {
+            start = Timer::read_QPC();
+            annealing->mainFun(matrix, alphaFactor, timeoutSeconds, start);
+            end = annealing->bestCostFoundQPC;
 
-        if (annealing->bestCost <= bestCost) {
-            bestCost = annealing->bestCost;
-            bestPath = annealing->bestPath;
+            results = Timer::getMicroSecondsElapsed(start, end);
+            resultsUS.push_back(results);
+            resultsMS.push_back(results / 1000);
+            resultsS.push_back(results / 1000000);
+
+            greedyCosts.push_back(annealing->greedyAlgorithmCost);
+            solCosts.push_back(annealing->bestCost);
+            endTemp.push_back(annealing->currentTemperature);
+            exps.push_back(exp((-1 / annealing->currentTemperature)));
+
+            solutionTimestamps.push_back(annealing->timestamps);
+            solutionProgressPoints.push_back(annealing->solutionProgressionPoints);
+
+            if (annealing->bestCost <= bestCost) {
+                bestCost = annealing->bestCost;
+                bestPath = annealing->bestPath;
+            }
         }
-    }
 
-    DataFileUtility::saveAutomaticSATestResults(fileName, resultsUS, resultsMS, resultsS, greedyCosts, solCosts,
-                                                endTemp, exps, alphaFactor, cols);
-    DataFileUtility::saveResultPath(bestResultPathFileName, bestPath);
+        DataFileUtility::saveAutomaticSATestResults(fileName + std::to_string(iter), resultsUS, resultsMS, resultsS,
+                                                    greedyCosts,
+                                                    solCosts,
+                                                    endTemp, exps, alphaFactor, cols);
+        DataFileUtility::saveResultPath(bestResultPathFileName + std::to_string(iter), bestPath);
+        DataFileUtility::saveTimestamps(timestampsFileName + std::to_string(iter), solutionTimestamps);
+        DataFileUtility::saveProgressionPoints(solutionProgressFileName + std::to_string(iter), solutionProgressPoints);
+
+
+        resultsUS.clear();
+        resultsMS.clear();
+        resultsS.clear();
+        greedyCosts.clear();
+        solCosts.clear();
+        endTemp.clear();
+        exps.clear();
+        solutionTimestamps.clear();
+        solutionProgressPoints.clear();
+
+        iter++;
+
+    }
+    //
+    annealing->testing = false;
     std::cout << "Done!" << std::endl;
     system("PAUSE");
 }
 
 void AppController::testTabuSearch() {
-    std::string fileName = "tabu_search_tests.csv";
+    std::string fileName = "tabu_search_tests";
     std::string bestResultPathFileName = "tabu_search_tests_bestpath";
+    std::string timestampsFileName = "tabu_search_tests_timestamps";
 
     std::string cols = "us,ms,s,greedy_c,sol_cost";
     std::vector<double> resultsUS;
@@ -285,15 +328,17 @@ void AppController::testTabuSearch() {
     std::vector<double> resultsS;
     std::vector<int> greedyCosts;
     std::vector<int> solCosts;
+    std::vector<std::vector<double>> solutionTimestamps;
 
     int bestCost = INT_MAX;
     std::vector<int> bestPath;
 
+    tabuSearch->testing = true;
     long long int start, end;
     double results;
     for (int i = 0; i < testNumber; i++) {
         start = Timer::read_QPC();
-        tabuSearch->mainFun(matrix, timeoutSeconds);
+        tabuSearch->mainFun(matrix, timeoutSeconds, start);
         end = tabuSearch->bestCostFoundQPC;
 
         results = Timer::getMicroSecondsElapsed(start, end);
@@ -303,6 +348,7 @@ void AppController::testTabuSearch() {
 
         greedyCosts.push_back(tabuSearch->greedyAlgorithmCost);
         solCosts.push_back(tabuSearch->bestSolutionFirstOccurrenceCost);
+        solutionTimestamps.push_back(tabuSearch->timestamps);
 
         if (tabuSearch->bestSolutionFirstOccurrenceCost <= bestCost) {
             bestCost = tabuSearch->bestSolutionFirstOccurrenceCost;
@@ -312,6 +358,8 @@ void AppController::testTabuSearch() {
 
     DataFileUtility::saveAutomaticTSTestResults(fileName, resultsUS, resultsMS, resultsS, greedyCosts, solCosts, cols);
     DataFileUtility::saveResultPath(bestResultPathFileName, bestPath);
+    DataFileUtility::saveTimestamps(timestampsFileName, solutionTimestamps);
+    tabuSearch->testing = false;
     std::cout << "Done!" << std::endl;
     system("PAUSE");
 }

@@ -24,6 +24,7 @@ private:
     int tabuIterationsCadence;
     int **tabuMoves = nullptr;
     int diversificationEventCounter = 0;
+    int diversificationEventIterations = INT_MAX;
 
     int masterListValidity = 10;
     std::list<std::pair<std::pair<int, int>, int>> neighboursMasterList;
@@ -38,6 +39,10 @@ private:
     };
 
 public:
+    bool testing = false;
+    std::vector<double> timestamps;
+    long long int startQPC;
+
     int greedyAlgorithmCost;
 
     std::vector<int> currentPath;
@@ -52,7 +57,7 @@ public:
 
     virtual ~TabuSearch();
 
-    void mainFun(ATSPMatrix *ATSPMatrix, int timeout);
+    void mainFun(ATSPMatrix *ATSPMatrix, int timeout, long long int startQPC);
 
     void solveTSP();
 

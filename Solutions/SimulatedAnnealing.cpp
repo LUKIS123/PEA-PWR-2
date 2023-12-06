@@ -2,6 +2,10 @@
 
 
 void SimulatedAnnealing::clearMemory() {
+    if (testing) {
+        timestamps.clear();
+        solutionProgressionPoints.clear();
+    }
     bestCostFoundQPC = Timer::read_QPC();
     currentPath.clear();
     bestPath.clear();
@@ -23,8 +27,9 @@ void SimulatedAnnealing::displayLatestResults() {
 }
 
 // Wyznaczanie wspolczynnikow i uruchomienie algorytmu
-void SimulatedAnnealing::mainFun(ATSPMatrix *ATSPMatrix, double alpha, int timeout) {
+void SimulatedAnnealing::mainFun(ATSPMatrix *ATSPMatrix, double alpha, int timeout, long long int startQPC) {
     clearMemory();
+    this->startQPC = startQPC;
 
     this->matrix = ATSPMatrix->getMatrix();
     this->matrixSize = ATSPMatrix->getSize();
@@ -32,6 +37,11 @@ void SimulatedAnnealing::mainFun(ATSPMatrix *ATSPMatrix, double alpha, int timeo
     this->timeoutSeconds = timeout;
 
     auto pathCostPair = GreedyAlgorithm::getBestGreedyAlgorithmResult(matrix, matrixSize);
+    if (testing) {
+        bestCostFoundQPC = Timer::read_QPC();
+        timestamps.push_back(Timer::getMicroSecondsElapsed(startQPC, bestCostFoundQPC) / 1000);
+        solutionProgressionPoints.push_back(pathCostPair.second);
+    }
     greedyAlgorithmCost = pathCostPair.second;
     currentPath = pathCostPair.first;
     currentCost = greedyAlgorithmCost;
@@ -53,22 +63,31 @@ void SimulatedAnnealing::solveTSP() {
                                                  );
     while ((breakAlgoTimePoint - std::chrono::system_clock::now()).count() > 0) {
         for (int step = 0; step < singleStepLength; step++) {
+            // Wyznaczanie sasiada zamieniajac 2 losowe wierzcholki
             auto changedPath = perturbPath(currentPath, matrixSize);
             int changedPathCost = calculateCost(matrix, changedPath);
+            // Akceptowanie nowego rozwiazania jesli nie jest gorsze od aktualnego
             if (changedPathCost <= currentCost) {
                 currentPath = changedPath;
                 currentCost = changedPathCost;
+
+                // Aktualizowanie najlepszego rozwiazania
                 if (changedPathCost < bestCost) {
                     bestPath = changedPath;
                     bestCost = changedPathCost;
                     bestCostFoundQPC = Timer::read_QPC();
+                    // Zapis kazdej zmiany na lepsze oraz czasu w ktorej znaleziono rozwiazanie
+                    if (testing) {
+                        timestamps.push_back(Timer::getMicroSecondsElapsed(startQPC, bestCostFoundQPC) / 1000);
+                        solutionProgressionPoints.push_back(bestCost);
+                    }
                 }
-            } else {
-                if (acceptanceFunction(currentCost, changedPathCost, currentTemperature)) {
-                    currentPath = changedPath;
-                    currentCost = changedPathCost;
-                }
+
+            } else if (acceptanceFunction(currentCost, changedPathCost, currentTemperature)) {
+                currentPath = changedPath;
+                currentCost = changedPathCost;
             }
+
         }
         // Schladzanie temperatury po petli for (schodkowe zmniejszanie temperatury)
         currentTemperature = CoolingFunctions::updateWithLinearCooling(currentTemperature, coolingFactor);

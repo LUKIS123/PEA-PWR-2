@@ -23,6 +23,11 @@ private:
     int singleStepLength;
 
 public:
+    bool testing = false;
+    std::vector<double> timestamps;
+    std::vector<int> solutionProgressionPoints;
+    long long int startQPC;
+
     int greedyAlgorithmCost;
 
     std::vector<int> currentPath;
@@ -39,7 +44,7 @@ public:
 
     static bool acceptanceFunction(int currentVertexWeight, int nextVertexWeight, double temperature);
 
-    void mainFun(ATSPMatrix *ATSPMatrix, double alpha, int timeout);
+    void mainFun(ATSPMatrix *ATSPMatrix, double alpha, int timeout, long long int startQPC);
 
     void solveTSP();
 

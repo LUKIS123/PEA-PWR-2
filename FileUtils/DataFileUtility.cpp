@@ -9,7 +9,7 @@ bool DataFileUtility::saveAutomaticTSTestResults(const std::string &FileName, co
                                                  const std::vector<int> &greedyCosts, const std::vector<int> &solCosts,
                                                  const std::string &headline) {
     ofstream file;
-    file.open(FileName, ios::out);
+    file.open(FileName + ".csv", ios::out);
     if (file.is_open()) {
         file << headline << endl;
         if (file.fail()) {
@@ -46,7 +46,7 @@ bool DataFileUtility::saveAutomaticSATestResults(const std::string &FileName, co
                                                  double factor,
                                                  const std::string &headline) {
     ofstream file;
-    file.open(FileName, ios::out);
+    file.open(FileName + ".csv", ios::out);
     if (file.is_open()) {
         file << headline << endl;
         if (file.fail()) {
@@ -119,4 +119,55 @@ std::vector<int> DataFileUtility::readPathFromFile(const string &FileName) {
         cout << "File error - OPEN" << endl;
     }
     return path;
+}
+
+bool DataFileUtility::saveTimestamps(const std::string &FileName, const vector<vector<double>> &timestamps) {
+    ofstream file;
+    file.open(FileName + ".csv", ios::out);
+    if (file.is_open()) {
+        file << "timestamps_MS" << endl;
+        if (file.fail()) {
+            cout << "File error - SAVE HEADLINE" << endl;
+            return false;
+        } else {
+            for (const auto &item: timestamps) {
+                for (const auto &timePoint: item) {
+                    file << timePoint << ",";
+                }
+                file << endl;
+            }
+
+            file.close();
+        }
+    } else {
+        cout << "File error - OPEN" << endl;
+        return false;
+    }
+    return true;
+}
+
+bool DataFileUtility::saveProgressionPoints(const std::string &FileName,
+                                            const std::vector<std::vector<int>> &progressionPoints) {
+    ofstream file;
+    file.open(FileName + ".csv", ios::out);
+    if (file.is_open()) {
+        file << "costs" << endl;
+        if (file.fail()) {
+            cout << "File error - SAVE HEADLINE" << endl;
+            return false;
+        } else {
+            for (const auto &item: progressionPoints) {
+                for (const auto &timePoint: item) {
+                    file << timePoint << ",";
+                }
+                file << endl;
+            }
+
+            file.close();
+        }
+    } else {
+        cout << "File error - OPEN" << endl;
+        return false;
+    }
+    return true;
 }
