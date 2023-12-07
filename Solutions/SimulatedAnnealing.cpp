@@ -75,8 +75,9 @@ void SimulatedAnnealing::solveTSP() {
                 if (changedPathCost < bestCost) {
                     bestPath = changedPath;
                     bestCost = changedPathCost;
-                    bestCostFoundQPC = Timer::read_QPC();
+
                     // Zapis kazdej zmiany na lepsze oraz czasu w ktorej znaleziono rozwiazanie
+                    bestCostFoundQPC = Timer::read_QPC();
                     if (testing) {
                         timestamps.push_back(Timer::getMicroSecondsElapsed(startQPC, bestCostFoundQPC) / 1000);
                         solutionProgressionPoints.push_back(bestCost);

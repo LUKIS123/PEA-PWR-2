@@ -41,6 +41,7 @@ private:
 public:
     bool testing = false;
     std::vector<double> timestamps;
+    std::vector<int> solutionProgressionPoints;
     long long int startQPC;
 
     int greedyAlgorithmCost;

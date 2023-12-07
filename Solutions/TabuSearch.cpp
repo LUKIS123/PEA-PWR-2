@@ -13,6 +13,7 @@ TabuSearch::~TabuSearch() {
 void TabuSearch::clearMemory() {
     if (testing) {
         timestamps.clear();
+        solutionProgressionPoints.clear();
     }
     bestCostFoundQPC = Timer::read_QPC();
     neighboursMasterList.clear();
@@ -53,6 +54,11 @@ void TabuSearch::mainFun(ATSPMatrix *ATSPMatrix, int timeout, long long int star
     this->diversificationEventIterations = tabuIterationsCadence * 3;
 
     auto pathCostPair = GreedyAlgorithm::getBestGreedyAlgorithmResult(matrix, matrixSize);
+    if (testing) {
+        bestCostFoundQPC = Timer::read_QPC();
+        timestamps.push_back(Timer::getMicroSecondsElapsed(startQPC, bestCostFoundQPC) / 1000);
+        solutionProgressionPoints.push_back(pathCostPair.second);
+    }
     greedyAlgorithmCost = pathCostPair.second;
     currentPath = pathCostPair.first;
     currentCost = greedyAlgorithmCost;
@@ -126,12 +132,14 @@ void TabuSearch::solveTSP() {
             currentBestPath = currentPath;
             currentBestCost = currentCost;
             if (currentCost < bestSolutionFirstOccurrenceCost) {
-                bestCostFoundQPC = Timer::read_QPC();
                 bestSolutionFirstOccurrenceCost = currentCost;
                 bestSolutionFirstOccurrence = currentPath;
+
                 // Zapis kazdej zmiany na lepsze oraz czasu w ktorej znaleziono rozwiazanie
+                bestCostFoundQPC = Timer::read_QPC();
                 if (testing) {
                     timestamps.push_back(Timer::getMicroSecondsElapsed(startQPC, bestCostFoundQPC) / 1000);
+                    solutionProgressionPoints.push_back(bestSolutionFirstOccurrenceCost);
                 }
             }
         }
@@ -150,13 +158,17 @@ void TabuSearch::solveTSP() {
             if (currentCost <= currentBestCost) {
                 currentBestPath = currentPath;
                 currentBestCost = currentCost;
-                bestCostFoundQPC = Timer::read_QPC();
 
-                bestSolutionFirstOccurrenceCost = currentCost;
-                bestSolutionFirstOccurrence = currentPath;
-                // Zapis kazdej zmiany na lepsze oraz czasu w ktorej znaleziono rozwiazanie
-                if (testing) {
-                    timestamps.push_back(Timer::getMicroSecondsElapsed(startQPC, bestCostFoundQPC) / 1000);
+                if (currentCost < bestSolutionFirstOccurrenceCost) {
+                    bestSolutionFirstOccurrenceCost = currentCost;
+                    bestSolutionFirstOccurrence = currentPath;
+
+                    // Zapis kazdej zmiany na lepsze oraz czasu w ktorej znaleziono rozwiazanie
+                    bestCostFoundQPC = Timer::read_QPC();
+                    if (testing) {
+                        timestamps.push_back(Timer::getMicroSecondsElapsed(startQPC, bestCostFoundQPC) / 1000);
+                        solutionProgressionPoints.push_back(bestSolutionFirstOccurrenceCost);
+                    }
                 }
             }
             iterationsWithoutImprovement = 0;
@@ -223,7 +235,7 @@ void TabuSearch::updateTabuList(int v1, int v2) {
 
 // Funkcja generujaca nowe rozwiazanie (strategia dywersyfikacji po okreslonej liczbie iteracji bez znalezienie lepszego rozwiazania)
 std::pair<std::vector<int>, int> TabuSearch::generateDiversificationCandidate() {
-    std::cout << "Current: " << currentCost << ", Best: " << currentBestCost << std::endl;
+    // std::cout << "Current: " << currentCost << ", Best: " << currentBestCost << std::endl;
 
     int candidateCost = INT_MAX;
     std::vector<int> candidatePath;

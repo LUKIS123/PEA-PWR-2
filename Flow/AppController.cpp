@@ -321,6 +321,7 @@ void AppController::testTabuSearch() {
     std::string fileName = "tabu_search_tests";
     std::string bestResultPathFileName = "tabu_search_tests_bestpath";
     std::string timestampsFileName = "tabu_search_tests_timestamps";
+    std::string solutionProgressFileName = "tabu_search_tests_progress";
 
     std::string cols = "us,ms,s,greedy_c,sol_cost";
     std::vector<double> resultsUS;
@@ -329,6 +330,7 @@ void AppController::testTabuSearch() {
     std::vector<int> greedyCosts;
     std::vector<int> solCosts;
     std::vector<std::vector<double>> solutionTimestamps;
+    std::vector<std::vector<int>> solutionProgressPoints;
 
     int bestCost = INT_MAX;
     std::vector<int> bestPath;
@@ -348,7 +350,9 @@ void AppController::testTabuSearch() {
 
         greedyCosts.push_back(tabuSearch->greedyAlgorithmCost);
         solCosts.push_back(tabuSearch->bestSolutionFirstOccurrenceCost);
+
         solutionTimestamps.push_back(tabuSearch->timestamps);
+        solutionProgressPoints.push_back(tabuSearch->solutionProgressionPoints);
 
         if (tabuSearch->bestSolutionFirstOccurrenceCost <= bestCost) {
             bestCost = tabuSearch->bestSolutionFirstOccurrenceCost;
@@ -359,6 +363,7 @@ void AppController::testTabuSearch() {
     DataFileUtility::saveAutomaticTSTestResults(fileName, resultsUS, resultsMS, resultsS, greedyCosts, solCosts, cols);
     DataFileUtility::saveResultPath(bestResultPathFileName, bestPath);
     DataFileUtility::saveTimestamps(timestampsFileName, solutionTimestamps);
+    DataFileUtility::saveProgressionPoints(solutionProgressFileName, solutionProgressPoints);
     tabuSearch->testing = false;
     std::cout << "Done!" << std::endl;
     system("PAUSE");
