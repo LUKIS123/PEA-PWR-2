@@ -49,10 +49,13 @@ void TabuSearch::mainFun(ATSPMatrix *ATSPMatrix, int timeout, long long int star
 
     this->matrix = ATSPMatrix->getMatrix();
     this->matrixSize = ATSPMatrix->getSize();
+    // Wyznaczanie kadencji tabu
     this->tabuIterationsCadence = (int) sqrt(matrixSize) * 2;
     this->timeoutSeconds = timeout;
+    // Wyznaczanie liczbe iteracji bez znalezienia lepszego rozwiazania przed uruchomieniem strategii dywersyfikacji
     this->diversificationEventIterations = tabuIterationsCadence * 3;
 
+    // Wyznaczanie rozwiazania algorytmu zachlannego
     auto pathCostPair = GreedyAlgorithm::getBestGreedyAlgorithmResult(matrix, matrixSize);
     if (testing) {
         bestCostFoundQPC = Timer::read_QPC();
@@ -66,6 +69,7 @@ void TabuSearch::mainFun(ATSPMatrix *ATSPMatrix, int timeout, long long int star
     currentBestCost = currentCost;
     bestSolutionFirstOccurrenceCost = currentBestCost;
 
+    // Inicjalizacja listy tabu
     tabuMoves = new int *[matrixSize];
     for (int i = 0; i < matrixSize; ++i) {
         tabuMoves[i] = new int[matrixSize];
@@ -82,6 +86,7 @@ void TabuSearch::mainFun(ATSPMatrix *ATSPMatrix, int timeout, long long int star
         currentFillCount += 1;
     }
 
+    // Wyznaczanie maksymalnej dlugosci master list
     if (matrixSize > 200) {
         masterListValidity = (int) (matrixSize * 0.05);
     } else {
@@ -235,8 +240,6 @@ void TabuSearch::updateTabuList(int v1, int v2) {
 
 // Funkcja generujaca nowe rozwiazanie (strategia dywersyfikacji po okreslonej liczbie iteracji bez znalezienie lepszego rozwiazania)
 std::pair<std::vector<int>, int> TabuSearch::generateDiversificationCandidate() {
-    // std::cout << "Current: " << currentCost << ", Best: " << currentBestCost << std::endl;
-
     int candidateCost = INT_MAX;
     std::vector<int> candidatePath;
 
@@ -310,6 +313,17 @@ TabuSearch::getNextMovesFromNeighboursMasterList(const std::vector<int> &solutio
     }
 
     std::list<std::pair<std::pair<int, int>, int>> masterList;
+
+//    for (const auto &item: allNeighboursSorted) {
+//        if (tabuMoves[item.first.first][item.first.second] != 0 &&
+//            currentBestCost > item.second) {
+//            masterList.push_back(item);
+//        } else {
+//            break;
+//        }
+//    }
+
+    // Dodawanie sasiadow nie-tabu do master list
     for (const auto &item: nonTabuNeighbours) {
         auto it = std::find_if(masterList.begin(), masterList.end(),
                                [&item](std::pair<std::pair<int, int>, int> element) {
@@ -318,11 +332,12 @@ TabuSearch::getNextMovesFromNeighboursMasterList(const std::vector<int> &solutio
         if (it == masterList.end()) {
             masterList.push_back(item);
         }
-
         if (masterList.size() == masterListValidity) {
             break;
         }
     }
+
+    // Kryterium aspiracji - dodawanie do master list elementu jesli ruch tabu daje lepszy wynik niz najlepszy znany
     auto bestNeighbour = allNeighboursSorted.front();
     if (tabuMoves[bestNeighbour.first.first][bestNeighbour.first.second] != 0 &&
         currentBestCost > bestNeighbour.second) {

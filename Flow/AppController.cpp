@@ -199,6 +199,12 @@ void AppController::readPathAndDisplayCalculatedCost() {
         pathVector = DataFileUtility::readPathFromFile(fileName);
     }
 
+    if (pathVector.empty() || pathVector.size() != matrix->getSize() + 1) {
+        std::cout << "Wrong input! Cannot calculate cost" << std::endl;
+        system("PAUSE");
+        return;
+    }
+
     matrix->calculatePathCost(pathVector);
     system("PAUSE");
 }
