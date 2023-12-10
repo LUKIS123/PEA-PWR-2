@@ -185,7 +185,20 @@ void AppController::displayLatestResults() {
 }
 
 void AppController::readPathAndDisplayCalculatedCost() {
-    auto pathVector = DataFileUtility::readPathFromFile(resultPathFileName);
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::string fileName;
+    std::cout << "DEFAULT FILE: 'latest_result_path.txt', PRESS ENTER TO SKIP" << std::endl;
+    std::cout << "Or place .txt file in executable folder and enter file name (WITHOUT .txt):" << std::endl;
+    std::getline(std::cin, fileName);
+
+    std::vector<int> pathVector;
+    if (fileName.empty()) {
+        pathVector = DataFileUtility::readPathFromFile(resultPathFileName);
+    } else {
+        pathVector = DataFileUtility::readPathFromFile(fileName);
+    }
+
     matrix->calculatePathCost(pathVector);
     system("PAUSE");
 }
@@ -249,69 +262,40 @@ void AppController::testSimulatedAnnealing() {
     int bestCost = INT_MAX;
     std::vector<int> bestPath;
 
-    // annela
-    //0.9998, 0.99988,
-    std::vector<double> alphas = {0.99975, 0.9998, 0.99985};
-    timeoutSeconds = 360;
-    int iter = 1;
-    testNumber = 10;
-    //
-
     annealing->testing = true;
     long long int start, end;
     double results;
+    for (int i = 0; i < testNumber; i++) {
+        start = Timer::read_QPC();
+        annealing->mainFun(matrix, alphaFactor, timeoutSeconds, start);
+        end = annealing->bestCostFoundQPC;
 
-    //
-    for (const auto &item: alphas) {
-        alphaFactor = item;
+        results = Timer::getMicroSecondsElapsed(start, end);
+        resultsUS.push_back(results);
+        resultsMS.push_back(results / 1000);
+        resultsS.push_back(results / 1000000);
 
-        for (int i = 0; i < testNumber; i++) {
-            start = Timer::read_QPC();
-            annealing->mainFun(matrix, alphaFactor, timeoutSeconds, start);
-            end = annealing->bestCostFoundQPC;
+        greedyCosts.push_back(annealing->greedyAlgorithmCost);
+        solCosts.push_back(annealing->bestCost);
+        endTemp.push_back(annealing->currentTemperature);
+        exps.push_back(exp((-1 / annealing->currentTemperature)));
 
-            results = Timer::getMicroSecondsElapsed(start, end);
-            resultsUS.push_back(results);
-            resultsMS.push_back(results / 1000);
-            resultsS.push_back(results / 1000000);
+        solutionTimestamps.push_back(annealing->timestamps);
+        solutionProgressPoints.push_back(annealing->solutionProgressionPoints);
 
-            greedyCosts.push_back(annealing->greedyAlgorithmCost);
-            solCosts.push_back(annealing->bestCost);
-            endTemp.push_back(annealing->currentTemperature);
-            exps.push_back(exp((-1 / annealing->currentTemperature)));
-
-            solutionTimestamps.push_back(annealing->timestamps);
-            solutionProgressPoints.push_back(annealing->solutionProgressionPoints);
-
-            if (annealing->bestCost <= bestCost) {
-                bestCost = annealing->bestCost;
-                bestPath = annealing->bestPath;
-            }
+        if (annealing->bestCost <= bestCost) {
+            bestCost = annealing->bestCost;
+            bestPath = annealing->bestPath;
         }
-
-        DataFileUtility::saveAutomaticSATestResults(fileName + std::to_string(iter), resultsUS, resultsMS, resultsS,
-                                                    greedyCosts,
-                                                    solCosts,
-                                                    endTemp, exps, alphaFactor, cols);
-        DataFileUtility::saveResultPath(bestResultPathFileName + std::to_string(iter), bestPath);
-        DataFileUtility::saveTimestamps(timestampsFileName + std::to_string(iter), solutionTimestamps);
-        DataFileUtility::saveProgressionPoints(solutionProgressFileName + std::to_string(iter), solutionProgressPoints);
-
-
-        resultsUS.clear();
-        resultsMS.clear();
-        resultsS.clear();
-        greedyCosts.clear();
-        solCosts.clear();
-        endTemp.clear();
-        exps.clear();
-        solutionTimestamps.clear();
-        solutionProgressPoints.clear();
-
-        iter++;
-
     }
-    //
+
+    DataFileUtility::saveAutomaticSATestResults(fileName, resultsUS, resultsMS, resultsS,
+                                                greedyCosts,
+                                                solCosts,
+                                                endTemp, exps, alphaFactor, cols);
+    DataFileUtility::saveResultPath(bestResultPathFileName, bestPath);
+    DataFileUtility::saveTimestamps(timestampsFileName, solutionTimestamps);
+    DataFileUtility::saveProgressionPoints(solutionProgressFileName, solutionProgressPoints);
     annealing->testing = false;
     std::cout << "Done!" << std::endl;
     system("PAUSE");

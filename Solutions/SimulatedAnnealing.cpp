@@ -83,12 +83,16 @@ void SimulatedAnnealing::solveTSP() {
                         solutionProgressionPoints.push_back(bestCost);
                     }
                 }
-
+                // Funkcja akceptacji
             } else if (acceptanceFunction(currentCost, changedPathCost, currentTemperature)) {
                 currentPath = changedPath;
                 currentCost = changedPathCost;
             }
 
+            // Przerwanie algorytmu jesli osiagnieto kryterium stopu
+            if ((breakAlgoTimePoint - std::chrono::system_clock::now()).count() < 0) {
+                break;
+            }
         }
         // Schladzanie temperatury po petli for (schodkowe zmniejszanie temperatury)
         currentTemperature = CoolingFunctions::updateWithLinearCooling(currentTemperature, coolingFactor);
@@ -96,8 +100,8 @@ void SimulatedAnnealing::solveTSP() {
 }
 
 // Funkcja zwracajaca decyzje o akceptacji badz odrzuceniu rozwiazania na podstawie prawdopodobienstwa wyznaczonego ze wzoru dla algorytmu SW
-bool SimulatedAnnealing::acceptanceFunction(int currentVertexWeight, int nextVertexWeight, double temperature) {
-    double probability = std::min(1.0, std::exp((double) (-(nextVertexWeight - currentVertexWeight) / temperature)));
+bool SimulatedAnnealing::acceptanceFunction(int currentPathCost, int nextPathCost, double temperature) {
+    double probability = std::min(1.0, std::exp((double) (-(nextPathCost - currentPathCost) / temperature)));
     double random = RandomDataGenerator::generateRandomDouble(0, 1);
     if (random < probability) {
         return true;

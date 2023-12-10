@@ -84,7 +84,7 @@ bool DataFileUtility::saveResultPath(const string &FileName, const vector<int> &
     ofstream file;
     file.open(FileName + ".txt", ios::out);
     if (file.is_open()) {
-        file << path.size() << endl << endl;
+        file << (path.size() - 1) << endl << endl;
         if (file.fail()) {
             cout << "File error - SAVE HEADLINE" << endl;
             return false;
@@ -109,9 +109,9 @@ std::vector<int> DataFileUtility::readPathFromFile(const string &FileName) {
     if (file.good()) {
 
         file >> size;
-        path = vector<int>(size, 0);
+        path = vector<int>(size + 1, 0);
 
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < (size + 1); i++) {
             file >> path[i];
         }
         file.close();

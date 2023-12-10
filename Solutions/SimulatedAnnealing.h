@@ -42,7 +42,7 @@ public:
 
     void displayLatestResults();
 
-    static bool acceptanceFunction(int currentVertexWeight, int nextVertexWeight, double temperature);
+    static bool acceptanceFunction(int currentPathCost, int nextPathCost, double temperature);
 
     void mainFun(ATSPMatrix *ATSPMatrix, double alpha, int timeout, long long int startQPC);
 
