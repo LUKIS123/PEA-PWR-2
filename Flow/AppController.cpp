@@ -68,6 +68,7 @@ void AppController::mainIndex() {
     std::cout << "Exiting Application..." << std::endl;
 }
 
+// Wczytanie macierzy sasiedztwa grafu z pliku
 void AppController::loadDataFile() {
     std::string fileName;
     std::cout << "Place .atsp file in executable folder and enter file name (WITHOUT .atsp):" << std::endl;
@@ -76,6 +77,7 @@ void AppController::loadDataFile() {
     system("PAUSE");
 }
 
+// Ustawienie kryterium stopu
 void AppController::setTimeout() {
     std::cout << "Set timeout [s]: ";
     std::cin >> timeoutSeconds;
@@ -92,6 +94,7 @@ void AppController::setTimeout() {
     }
 }
 
+// Ustawienie wspolczynnika schladzania algorytmu symulowanego wyzarzania
 void AppController::setAlphaFactor() {
     std::cout << "Set alpha (1 > a > 0): ";
     std::cin >> alphaFactor;
@@ -108,6 +111,7 @@ void AppController::setAlphaFactor() {
     }
 }
 
+// Uruchomienie algorytmu symulowanego wyzarzania
 void AppController::runSimulatedAnnealing() {
     if (!matrix->exists) {
         std::cout << "MATRIX IS EMPTY" << std::endl;
@@ -132,6 +136,8 @@ void AppController::runSimulatedAnnealing() {
     system("PAUSE");
 }
 
+
+// Uruchomienie algorytmu przeszukiwania taby
 void AppController::runTabuSearch() {
     if (!matrix->exists) {
         std::cout << "MATRIX IS EMPTY" << std::endl;
@@ -155,6 +161,7 @@ void AppController::runTabuSearch() {
     system("PAUSE");
 }
 
+// Wyswietl wynik ostatniego uruchomienia
 void AppController::displayLatestResults() {
     std::cout << "algorithm: ";
     switch (latestRun) {
@@ -184,6 +191,7 @@ void AppController::displayLatestResults() {
     system("PAUSE");
 }
 
+// Wczytaj sciezke z pliku i oblicz koszt sciezki
 void AppController::readPathAndDisplayCalculatedCost() {
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -248,6 +256,7 @@ void AppController::testsMenu() {
     }
 }
 
+// Metoda do testow symulowanego wyzarzania
 void AppController::testSimulatedAnnealing() {
     std::string fileName = "simulated_annealing_tests";
     std::string bestResultPathFileName = "simulated_annealing_tests_bestpath";
@@ -307,6 +316,7 @@ void AppController::testSimulatedAnnealing() {
     system("PAUSE");
 }
 
+// Metoda do testow przeszukiwania tabu
 void AppController::testTabuSearch() {
     std::string fileName = "tabu_search_tests";
     std::string bestResultPathFileName = "tabu_search_tests_bestpath";

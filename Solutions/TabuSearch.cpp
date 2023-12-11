@@ -107,19 +107,25 @@ void TabuSearch::solveTSP() {
         // Przegladanie sasiednich rozwiazan (wszystkie mozliwe zamiany dwoch wierzcholkow),
         // tworznie master listy zawierajacej n elementow, aktualizowana co jakis czas
         if (neighboursMasterList.empty()) {
+            // Przeglad sasiedztwa jesli master list jest pusta
             neighboursMasterList = getNextMovesFromNeighboursMasterList(currentPath);
             lastMasterListElementCost = neighboursMasterList.back().second;
         } else {
+            // Aktualizacja kosztow kandydatow master list
             updateMasterListCosts(neighboursMasterList, currentPath);
+            // Jesli koszt najlepszego kandydata jest gorszy od kosztu najlepszego w oryginalenj liscie (po dokonaniu przegladu)
+            // Dokonujemy przegladu sasiedztwa ponownie
             if (neighboursMasterList.front().second > lastMasterListElementCost) {
                 neighboursMasterList = getNextMovesFromNeighboursMasterList(currentPath);
                 lastMasterListElementCost = neighboursMasterList.back().second;
             }
         }
 
+        // Pobieranie najlepszego kandydata z master list
         std::pair<int, int> nextVertexPair = neighboursMasterList.front().first;
         int nextVertexPairSwapCost = neighboursMasterList.front().second;
 
+        // Aktualizacja sciezki oraz kosztu
         currentPath.pop_back();
         swapVectorElements(nextVertexPair.first, nextVertexPair.second, currentPath);
         currentPath.push_back(currentPath[0]);
@@ -176,6 +182,7 @@ void TabuSearch::solveTSP() {
                     }
                 }
             }
+            // Reset licznika uruchomienia strategii dywersyfikacji
             iterationsWithoutImprovement = 0;
             ++diversificationEventCounter;
         }
@@ -188,6 +195,7 @@ std::vector<std::pair<std::pair<int, int>, int>>
 TabuSearch::getNextMovesFromNeighbours(const std::vector<int> &solution) {
     auto neighbourList = std::vector<std::pair<std::pair<int, int>, int>>();
     neighbourList.reserve((matrixSize * matrixSize) / 2);
+    // Przegladamy wszystkie mozliwe zamiany wierzcholkow (N*N)/2
     for (int i = 0; i < matrixSize - 1; ++i) {
         for (int j = i + 1; j < matrixSize; ++j) {
             int cost = getSwappedPathCost(i, j, solution);
@@ -314,14 +322,15 @@ TabuSearch::getNextMovesFromNeighboursMasterList(const std::vector<int> &solutio
 
     std::list<std::pair<std::pair<int, int>, int>> masterList;
 
-//    for (const auto &item: allNeighboursSorted) {
-//        if (tabuMoves[item.first.first][item.first.second] != 0 &&
-//            currentBestCost > item.second) {
-//            masterList.push_back(item);
-//        } else {
-//            break;
-//        }
-//    }
+    // Kryterium aspiracji - dodawanie do master list elementu jesli ruch tabu daje lepszy wynik niz najlepszy znany
+    for (const auto &item: allNeighboursSorted) {
+        if (tabuMoves[item.first.first][item.first.second] != 0 &&
+            currentBestCost > item.second) {
+            masterList.push_back(item);
+        } else {
+            break;
+        }
+    }
 
     // Dodawanie sasiadow nie-tabu do master list
     for (const auto &item: nonTabuNeighbours) {
@@ -335,13 +344,6 @@ TabuSearch::getNextMovesFromNeighboursMasterList(const std::vector<int> &solutio
         if (masterList.size() == masterListValidity) {
             break;
         }
-    }
-
-    // Kryterium aspiracji - dodawanie do master list elementu jesli ruch tabu daje lepszy wynik niz najlepszy znany
-    auto bestNeighbour = allNeighboursSorted.front();
-    if (tabuMoves[bestNeighbour.first.first][bestNeighbour.first.second] != 0 &&
-        currentBestCost > bestNeighbour.second) {
-        masterList.push_front(bestNeighbour);
     }
 
     return masterList;

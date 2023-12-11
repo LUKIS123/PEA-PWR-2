@@ -37,6 +37,7 @@ std::pair<std::vector<int>, int> GreedyAlgorithm::solveGreedyAlgorithm(int **mat
     return std::make_pair(path, distance);
 }
 
+// Funkcja wykonujaca algorytm zachlanny sprawdzajac wszystkie wierzcholki i zwracajaca najlepszy rezultat
 std::pair<std::vector<int>, int> GreedyAlgorithm::getBestGreedyAlgorithmResult(int **matrix, int matrixSize) {
     int bestCost = INT_MAX;
     std::vector<int> bestPath;

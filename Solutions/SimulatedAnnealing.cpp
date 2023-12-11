@@ -36,6 +36,7 @@ void SimulatedAnnealing::mainFun(ATSPMatrix *ATSPMatrix, double alpha, int timeo
     this->coolingFactor = alpha;
     this->timeoutSeconds = timeout;
 
+    // Wyznaczanie rozwiazania przy pomocy metody zachlannej
     auto pathCostPair = GreedyAlgorithm::getBestGreedyAlgorithmResult(matrix, matrixSize);
     if (testing) {
         bestCostFoundQPC = Timer::read_QPC();
@@ -48,8 +49,10 @@ void SimulatedAnnealing::mainFun(ATSPMatrix *ATSPMatrix, double alpha, int timeo
     bestPath = currentPath;
     bestCost = greedyAlgorithmCost;
 
+    // Wyznaczanie temperatury poczatkowej
     startingTemperature = calculateInitialTemperature(matrix, matrixSize);
     currentTemperature = startingTemperature;
+    // Wyznaczanie dlugosci epoki
     singleStepLength = matrixSize * 10;
 
     solveTSP();

@@ -14,6 +14,7 @@ int ATSPMatrix::getSize() {
     return size;
 }
 
+// Wczytanie macierzy z pliku
 void ATSPMatrix::loadFromFile(const std::string &filename) {
     clearData();
 
@@ -60,6 +61,7 @@ void ATSPMatrix::clearData() {
     }
 }
 
+// Wyswietlanie macierzy
 void ATSPMatrix::displayMatrix() {
     if (matrix == nullptr) {
         std::cout << "Matrix is empty" << std::endl;
@@ -84,6 +86,7 @@ void ATSPMatrix::displayMatrix() {
     }
 }
 
+// Obliczanie kosztu sciezki
 void ATSPMatrix::calculatePathCost(const std::vector<int> &path) {
     if (matrix == nullptr) {
         std::cout << "Matrix is empty" << std::endl;
