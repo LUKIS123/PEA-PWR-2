@@ -9,5 +9,3 @@ int main() {
     delete controller;
     return 0;
 }
-// todo: dodac dodawanie pozostałych elementow tabu jesli spelniaja aspiracje
-// dodac komentarze do TABU SEARCH
